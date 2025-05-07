@@ -1,1 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Rubik:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+
+button {
+  cursor: pointer;
+}
+
+.btn-fancy {
+  @apply transition-all duration-300 border border-transparent shadow px-8 py-1 rounded-[5px] font-medium bg-white text-[#0C5560];
+}
+.btn-fancy:hover, .btn-fancy:focus {
+  @apply bg-[#0C5560] text-white -translate-y-[3px] shadow-lg;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
