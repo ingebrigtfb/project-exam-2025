@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Rubik:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+body {
+    background-color: #ffff;
+}
 button {
   cursor: pointer;
 }

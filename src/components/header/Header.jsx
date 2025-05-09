@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import LogoWhite from '../../assets/Logo-white.svg';
 import LogoTeal from '../../assets/Logo-teal.svg';
+import { FaUserCircle } from 'react-icons/fa';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -81,20 +82,7 @@ const Header = () => {
               to="/profile"
               className={`p-2 rounded-full transition-colors duration-300 ${navColor}`}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
+              <FaUserCircle className="h-6 w-6" />
             </Link>
           </div>
 
@@ -175,20 +163,7 @@ const Header = () => {
             opacity: menuOpen ? 1 : 0.5,
           }}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-8 w-8"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
+          <FaUserCircle className="h-8 w-8" />
         </Link>
       </div>
     </header>

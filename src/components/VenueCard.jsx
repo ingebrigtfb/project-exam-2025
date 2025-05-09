@@ -14,7 +14,7 @@ const VenueCard = ({ venue }) => {
       : 'https://placehold.co/300x200?text=No+Image';
 
   return (
-    <div className="bg-white rounded-lg shadow w-[298px] h-[300px] flex flex-col">
+    <div className="bg-white rounded-lg shadow w-[298px] h-[320px] flex flex-col">
       <div className="relative">
         <img
           src={imageUrl}

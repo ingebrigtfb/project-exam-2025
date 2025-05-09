@@ -10,6 +10,7 @@ import Bookings from './pages/Bookings';
 import ManagerDashboard from './pages/ManagerDashboard';
 import ManageVenues from './pages/ManageVenues';
 import ManageBookings from './pages/ManageBookings';
+import RequireAuth from './auth/RequireAuth';
 
 const App = () => (
   <Routes>
@@ -19,11 +20,31 @@ const App = () => (
       <Route path="venues/:id" element={<VenueDetails />} />
       <Route path="register" element={<Register />} />
       <Route path="login" element={<Login />} />
-      <Route path="profile" element={<Profile />} />
-      <Route path="bookings" element={<Bookings />} />
-      <Route path="manager" element={<ManagerDashboard />} />
-      <Route path="manager/venues" element={<ManageVenues />} />
-      <Route path="manager/bookings" element={<ManageBookings />} />
+      <Route path="profile" element={
+        <RequireAuth>
+          <Profile />
+        </RequireAuth>
+      } />
+      <Route path="bookings" element={
+        <RequireAuth>
+          <Bookings />
+        </RequireAuth>
+      } />
+      <Route path="manager" element={
+        <RequireAuth>
+          <ManagerDashboard />
+        </RequireAuth>
+      } />
+      <Route path="manager/venues" element={
+        <RequireAuth>
+          <ManageVenues />
+        </RequireAuth>
+      } />
+      <Route path="manager/bookings" element={
+        <RequireAuth>
+          <ManageBookings />
+        </RequireAuth>
+      } />
     </Route>
   </Routes>
 );
