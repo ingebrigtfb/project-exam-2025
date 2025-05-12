@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types';
 import { CiHeart } from 'react-icons/ci';
+import { FaHeart } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-const VenueCard = ({ venue }) => {
+const VenueCard = ({ venue, isFavorite, onToggleFavorite, onRequireAuth }) => {
   const navigate = useNavigate();
 
   const imageUrl =
@@ -21,8 +22,16 @@ const VenueCard = ({ venue }) => {
           alt={venue.media && venue.media[0]?.alt ? venue.media[0].alt : venue.name} 
           className="rounded-t-md w-full h-42 object-cover"
         />
-        <button className="absolute top-2 right-2 bg-white/70 rounded-full p-1 shadow transition">
-          <CiHeart size={24} color="#0C5560" />
+        <button
+          className={`absolute top-2 right-2 rounded-full p-1 shadow transition bg-white/70 ${isFavorite ? 'text-red-500' : 'text-[#0C5560]'}`}
+          onClick={e => {
+            e.stopPropagation();
+            if (onToggleFavorite) onToggleFavorite(venue.id);
+            else if (onRequireAuth) onRequireAuth();
+          }}
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+        >
+          {isFavorite ? <FaHeart size={24} color="#ef4444" /> : <CiHeart size={24} color="#0C5560" />}
         </button>
       </div>
       <div className="p-3 flex flex-col flex-1">
@@ -43,6 +52,9 @@ const VenueCard = ({ venue }) => {
 
 VenueCard.propTypes = {
   venue: PropTypes.object.isRequired,
+  isFavorite: PropTypes.bool,
+  onToggleFavorite: PropTypes.func,
+  onRequireAuth: PropTypes.func,
 };
 
 export default VenueCard;

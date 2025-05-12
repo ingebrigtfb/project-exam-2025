@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../../assets/background+overlay.png';
 import VenueCard from '../VenueCard';
+import AuthModal from '../../auth/components/AuthModal';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 
@@ -23,6 +24,34 @@ const HomeHero = () => {
   const navigate = useNavigate();
   const [topVenues, setTopVenues] = useState([]);
   const cardRefs = useRef([]);
+  const [authOpen, setAuthOpen] = useState(false);
+
+  const user = JSON.parse(localStorage.getItem('user'));
+  const favoritesKey = user ? `favorites_${user.name}` : null;
+  const [favorites, setFavorites] = useState(() => {
+    if (!favoritesKey) return [];
+    try {
+      return JSON.parse(localStorage.getItem(favoritesKey)) || [];
+    } catch {
+      return [];
+    }
+  });
+
+  const saveFavorites = (fav) => {
+    if (!favoritesKey) return;
+    setFavorites(fav);
+    localStorage.setItem(favoritesKey, JSON.stringify(fav));
+  };
+
+  const handleToggleFavorite = (venueId) => {
+    if (!user) {
+      setAuthOpen(true);
+      return;
+    }
+    const isFav = favorites.includes(venueId);
+    const newFavs = isFav ? favorites.filter(id => id !== venueId) : [...favorites, venueId];
+    saveFavorites(newFavs);
+  };
 
   useEffect(() => {
     fetchTopVenues().then(setTopVenues);
@@ -56,6 +85,16 @@ const HomeHero = () => {
 
   // Reset refs before rendering new ones
   cardRefs.current = [];
+
+  useEffect(() => {
+    if (favoritesKey) {
+      try {
+        setFavorites(JSON.parse(localStorage.getItem(favoritesKey)) || []);
+      } catch {
+        setFavorites([]);
+      }
+    }
+  }, [favoritesKey]);
 
   return (
     <section className="relative h-[621px] flex items-center justify-center">
@@ -94,7 +133,12 @@ const HomeHero = () => {
             ref={(el) => (cardRefs.current[idx] = el)}
             className="max-w-[298px] w-full flex justify-center transition-all duration-300"
           >
-            <VenueCard venue={venue} />
+            <VenueCard
+              venue={venue}
+              isFavorite={favorites.includes(venue.id)}
+              onToggleFavorite={handleToggleFavorite}
+              onRequireAuth={() => setAuthOpen(true)}
+            />
           </div>
         ))}
       </div>
@@ -108,11 +152,17 @@ const HomeHero = () => {
               ref={(el) => (cardRefs.current[idx] = el)}
               className="w-full flex justify-center"
             >
-              <VenueCard venue={venue} />
+              <VenueCard
+                venue={venue}
+                isFavorite={favorites.includes(venue.id)}
+                onToggleFavorite={handleToggleFavorite}
+                onRequireAuth={() => setAuthOpen(true)}
+              />
             </div>
           ))}
         </div>
       </div>
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </section>
   );
 };
