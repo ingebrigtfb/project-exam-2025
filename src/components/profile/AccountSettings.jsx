@@ -12,7 +12,7 @@ export default function AccountSettings({ user, setUser }) {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
-    window.location.reload();
+    window.location.href = '/';
   };
 
   return (

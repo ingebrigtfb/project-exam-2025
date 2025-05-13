@@ -15,7 +15,7 @@ const VenueCard = ({ venue, isFavorite, onToggleFavorite, onRequireAuth }) => {
       : 'https://placehold.co/300x200?text=No+Image';
 
   return (
-    <div className="bg-white rounded-lg shadow w-[298px] h-[320px] flex flex-col">
+    <div className="bg-white rounded-lg shadow w-full max-w-[320px] mx-auto min-h-[220px] flex flex-col">
       <div className="relative">
         <img
           src={imageUrl}

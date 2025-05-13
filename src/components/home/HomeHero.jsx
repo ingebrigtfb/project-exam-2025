@@ -83,7 +83,6 @@ const HomeHero = () => {
     return () => ScrollTrigger.getAll().forEach(trigger => trigger.kill());
   }, [topVenues]);
 
-  // Reset refs before rendering new ones
   cardRefs.current = [];
 
   useEffect(() => {
@@ -126,7 +125,7 @@ const HomeHero = () => {
       </div>
 
       {/* Desktop layout */}
-      <div className="hidden md:flex md:absolute md:bottom-0 md:z-20 md:w-full md:max-w-[1000px] md:mx-auto md:px-4 md:justify-center md:gap-6 md:translate-y-55">
+      <div className="hidden md:flex md:absolute md:bottom-0 md:z-20 md:w-full md:max-w-[1000px] md:mx-auto md:px-4 md:justify-center md:gap-6 md:translate-y-48">
         {topVenues.map((venue, idx) => (
           <div
             key={venue.id}
@@ -144,7 +143,7 @@ const HomeHero = () => {
       </div>
 
       {/* Mobile layout */}
-      <div className="md:hidden absolute bottom-0 z-20 w-full px-4 translate-y-220">
+      <div className="md:hidden absolute bottom-0 z-20 w-full px-4 translate-y-200">
         <div className="flex flex-col items-center gap-6">
           {topVenues.map((venue, idx) => (
             <div
