@@ -1,6 +1,7 @@
 import HomeHero from '../components/home/HomeHero';
 import PopularCat from '../components/home/PopularCat';
 
+
 const Home = () => {
   return (
     <div className='min-h-screen'>

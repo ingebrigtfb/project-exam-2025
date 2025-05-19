@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaSearch, FaMapMarkerAlt, FaUserFriends, FaRegCalendarAlt } from 'react-icons/fa';
+import { FaSearch, FaMapMarkerAlt, FaUserFriends, FaRegCalendarAlt, FaUndo } from 'react-icons/fa';
 import northernlights from '../../assets/northernlights.jpeg';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -24,6 +24,19 @@ export default function BookingSearch({ onSearch }) {
       guests: guestsNum
     });
     setGuests(String(guestsNum)); 
+  };
+
+  const handleReset = () => {
+    setWhere('');
+    setCheckIn(null);
+    setCheckOut(null);
+    setGuests('1');
+    onSearch?.({
+      where: '',
+      checkIn: '',
+      checkOut: '',
+      guests: 1
+    });
   };
 
   return (
@@ -73,6 +86,7 @@ export default function BookingSearch({ onSearch }) {
               value={where}
               onChange={e => setWhere(e.target.value)}
               className="w-full bg-transparent outline-none text-gray-700 placeholder-gray-400 text-base"
+              required
             />
           </div>
         </div>
@@ -97,6 +111,7 @@ export default function BookingSearch({ onSearch }) {
                 dateFormat="dd/MM/yyyy"
                 minDate={new Date()}
                 aria-label="Check in date"
+                required
               />
             </div>
           </div>
@@ -117,6 +132,7 @@ export default function BookingSearch({ onSearch }) {
                 className="w-full bg-transparent outline-none text-gray-700 placeholder-gray-400 text-base py-1"
                 dateFormat="dd/MM/yyyy"
                 aria-label="Check out date"
+                required
               />
             </div>
           </div>
@@ -137,16 +153,27 @@ export default function BookingSearch({ onSearch }) {
               }}
               className="w-16 bg-transparent outline-none text-gray-700 placeholder-gray-400 text-base"
               inputMode="numeric"
+              required
             />
           </div>
         </div>
-        <button
-          type="submit"
-          className="bg-[#0C5560] text-white rounded-xl p-3 shadow-md hover:bg-[#094147] transition flex items-center justify-center w-full md:w-auto ml-0 md:ml-4 mt-2 md:mt-0"
-          aria-label="Search"
-        >
-          <FaSearch size={28} />
-        </button>
+        <div className="flex gap-2 ml-0 md:ml-4 mt-2 md:mt-0">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="text-gray-500 hover:text-gray-700 transition flex items-center justify-center p-2"
+            aria-label="Reset search"
+          >
+            <FaUndo size={20} />
+          </button>
+          <button
+            type="submit"
+            className="bg-[#0C5560] text-white rounded-xl p-3 shadow-md hover:bg-[#094147] transition flex items-center justify-center"
+            aria-label="Search"
+          >
+            <FaSearch size={28} />
+          </button>
+        </div>
       </form>
     </div>
   );

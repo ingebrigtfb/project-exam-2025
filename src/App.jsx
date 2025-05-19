@@ -11,13 +11,20 @@ import ManagerDashboard from './pages/ManagerDashboard';
 import ManageVenues from './pages/ManageVenues';
 import ManageBookings from './pages/ManageBookings';
 import RequireAuth from './auth/RequireAuth';
+import BookingDetails from './pages/BookingDetails';
+import BookingConfirmation from './pages/BookingConfirmation';
+
 
 const App = () => (
   <Routes>
     <Route path="/" element={<Layout />}>
       <Route index element={<Home />} />
       <Route path="venues" element={<Venues />} />
-      <Route path="venues/:id" element={<VenueDetails />} />
+      <Route path="venues/:id" element={
+        <RequireAuth>
+          <VenueDetails />
+        </RequireAuth>
+      } />
       <Route path="register" element={<Register />} />
       <Route path="login" element={<Login />} />
       <Route path="profile" element={
@@ -28,6 +35,11 @@ const App = () => (
       <Route path="bookings" element={
         <RequireAuth>
           <Bookings />
+        </RequireAuth>
+      } />
+      <Route path="bookings/:id" element={
+        <RequireAuth>
+          <BookingDetails />
         </RequireAuth>
       } />
       <Route path="manager" element={
@@ -46,6 +58,7 @@ const App = () => (
         </RequireAuth>
       } />
     </Route>
+    <Route path="/booking-confirmation" element={<BookingConfirmation />} />
   </Routes>
 );
 

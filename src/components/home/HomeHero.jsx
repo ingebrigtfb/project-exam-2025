@@ -124,7 +124,7 @@ const HomeHero = () => {
         </button>
       </div>
 
-      {/* Desktop layout */}
+      {/* Desktop layout */} 
       <div className="hidden md:flex md:absolute md:bottom-0 md:z-20 md:w-full md:max-w-[1000px] md:mx-auto md:px-4 md:justify-center md:gap-6 md:translate-y-48">
         {topVenues.map((venue, idx) => (
           <div

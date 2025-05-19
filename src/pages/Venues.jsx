@@ -46,16 +46,36 @@ const Venues = () => {
   const loadVenues = async (pageNum = page, searchParams = search) => {
     setLoading(true);
     let url;
+    let venuesList = [];
+    
     if (searchParams.where) {
-      url = `https://v2.api.noroff.dev/holidaze/venues/search?q=${encodeURIComponent(searchParams.where)}&limit=${VENUES_PER_PAGE}&page=${pageNum}`;
+      // Use pagination for search results
+      url = `https://v2.api.noroff.dev/holidaze/venues/search?q=${encodeURIComponent(searchParams.where)}&limit=${VENUES_PER_PAGE}&page=${pageNum}&sort=created&sortOrder=desc`;
+      const res = await fetch(url);
+      const data = await res.json();
+      venuesList = data.data || [];
+      setTotalVenues(data.meta?.totalCount || 0);
+
+      // Apply guest filter to search results
+      if (searchParams.guests) {
+        venuesList = venuesList.filter(venue => venue.maxGuests >= searchParams.guests);
+        setTotalVenues(venuesList.length);
+      }
     } else {
-      url = `https://v2.api.noroff.dev/holidaze/venues?limit=${VENUES_PER_PAGE}&page=${pageNum}`;
+      // Use API's maxGuests_gte parameter when filtering by guests
+      const guestsFilter = searchParams.guests ? `&maxGuests_gte=${searchParams.guests}` : '';
+      url = `https://v2.api.noroff.dev/holidaze/venues?limit=${VENUES_PER_PAGE}&page=${pageNum}${guestsFilter}&sort=created&sortOrder=desc`;
+      const res = await fetch(url);
+      const data = await res.json();
+      venuesList = data.data || [];
+      
+      // For guest-only search, we need to get all venues that match the criteria
+      if (searchParams.guests) {
+        setTotalVenues(data.meta?.totalCount || 0);
+      } else {
+        setTotalVenues(data.meta?.totalCount || 0);
+      }
     }
-    if (searchParams.guests) url += `&maxGuests_gte=${searchParams.guests}`;
-    // Note: The API does not support date filtering directly
-    const res = await fetch(url);
-    const data = await res.json();
-    let venuesList = data.data || [];
 
     // Date-availability filtering
     if (searchParams.checkIn && searchParams.checkOut) {
@@ -87,13 +107,7 @@ const Venues = () => {
       });
     }
 
-    // Client-side guests filter
-    if (searchParams.guests) {
-      venuesList = venuesList.filter(venue => venue.maxGuests >= searchParams.guests);
-    }
-
     setVenues(venuesList);
-    setTotalVenues(data.meta?.totalCount || 0); // Note: totalCount may not match filtered count
     setLoading(false);
   };
 

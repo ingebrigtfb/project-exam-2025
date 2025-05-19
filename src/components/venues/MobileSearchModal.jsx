@@ -1,4 +1,4 @@
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaUndo } from 'react-icons/fa';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../styles/datepicker-teal.css';
@@ -7,6 +7,14 @@ export default function MobileSearchModal({
   open, onClose, where, setWhere, checkIn, setCheckIn, checkOut, setCheckOut, guests, setGuests, handleSubmit
 }) {
   if (!open) return null;
+
+  const handleReset = () => {
+    setWhere('');
+    setCheckIn(null);
+    setCheckOut(null);
+    setGuests('1');
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white w-full max-w-md mx-auto rounded-2xl shadow-xl p-6 relative flex flex-col">
@@ -21,6 +29,7 @@ export default function MobileSearchModal({
               value={where}
               onChange={e => setWhere(e.target.value)}
               className="w-full bg-gray-100 rounded-lg px-3 py-2 outline-none text-gray-700 placeholder-gray-400 text-base"
+              required
             />
           </div>
           <div>
@@ -41,6 +50,7 @@ export default function MobileSearchModal({
               dateFormat="dd/MM/yyyy"
               minDate={new Date()}
               aria-label="Check in date"
+              required
             />
           </div>
           <div>
@@ -56,6 +66,7 @@ export default function MobileSearchModal({
               className="w-full bg-gray-100 rounded-lg px-3 py-2 outline-none text-gray-700 placeholder-gray-400 text-base"
               dateFormat="dd/MM/yyyy"
               aria-label="Check out date"
+              required
             />
           </div>
           <div>
@@ -72,11 +83,24 @@ export default function MobileSearchModal({
               }}
               className="w-full bg-gray-100 rounded-lg px-3 py-2 outline-none text-gray-700 placeholder-gray-400 text-base"
               inputMode="numeric"
+              required
             />
           </div>
-          <button type="submit" className="w-full bg-[#0C5560] text-white rounded-xl p-3 shadow-md hover:bg-[#094147] transition font-semibold text-lg flex items-center justify-center gap-2 mt-2">
-            <FaSearch size={22} /> Search
-          </button>
+          <div className="flex gap-2 mt-2">
+            <button
+              type="button"
+              onClick={handleReset}
+              className="flex-1 text-gray-500 hover:text-gray-700 transition font-medium text-base flex items-center justify-center gap-2 py-2"
+            >
+              <FaUndo size={18} /> Clear
+            </button>
+            <button
+              type="submit"
+              className="flex-1 bg-[#0C5560] text-white rounded-xl p-3 shadow-md hover:bg-[#094147] transition font-semibold text-lg flex items-center justify-center gap-2"
+            >
+              <FaSearch size={22} /> Search
+            </button>
+          </div>
         </form>
       </div>
     </div>

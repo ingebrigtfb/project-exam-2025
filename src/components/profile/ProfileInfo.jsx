@@ -8,7 +8,7 @@ export default function ProfileInfo({ name, email, bio, venueManager }) {
       </div>
       <div className="mt-4 md:mt-0 md:text-left max-w-md md:w-1/2">
         <div className="font-semibold">About {name}:</div>
-        <div className="text-gray-700 whitespace-pre-line">{bio}</div>
+        <div className="text-gray-700 whitespace-pre-line break-words">{bio}</div>
       </div>
     </div>
   );

@@ -15,7 +15,10 @@ const VenueCard = ({ venue, isFavorite, onToggleFavorite, onRequireAuth }) => {
       : 'https://placehold.co/300x200?text=No+Image';
 
   return (
-    <div className="bg-white rounded-lg shadow w-full max-w-[320px] mx-auto min-h-[220px] flex flex-col">
+    <div 
+      className="bg-white rounded-lg shadow w-full max-w-[320px] mx-auto min-h-[220px] flex flex-col cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-lg"
+      onClick={() => navigate(`/venues/${venue.id}`)}
+    >
       <div className="relative">
         <img
           src={imageUrl}
@@ -39,12 +42,10 @@ const VenueCard = ({ venue, isFavorite, onToggleFavorite, onRequireAuth }) => {
         <p className="text-xs text-gray-600 mb-3 overflow-hidden text-ellipsis line-clamp-3">
           {venue.description}
         </p>
-        <button
-          className="block w-fit mx-auto border border-[#0C5560] text-[#0C5560] rounded py-1 px-7 transition hover:bg-[#0C5560] hover:text-white font-medium mt-auto"
-          onClick={() => navigate(`/venues/${venue.id}`)}
-        >
-          Book
-        </button>
+        <div className="mt-auto text-right">
+          <span className="text-[#0C5560] font-semibold">${venue.price}</span>
+          <span className="text-gray-500 text-sm"> / night</span>
+        </div>
       </div>
     </div>
   );

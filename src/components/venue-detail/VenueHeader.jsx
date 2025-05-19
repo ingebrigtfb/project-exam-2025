@@ -1,13 +1,13 @@
 import { FaStar, FaRegStar } from 'react-icons/fa';
-import VenueCarousel from './VenueCarousel';
+import ImageCarousel from '../imageCarousel/ImageCarousel';
 
 export default function VenueHeader({ venue }) {
   if (!venue) return null;
   const rating = Math.round(venue.rating || 0);
   return (
     <div className="w-full max-w-[1000px] mx-auto mt-8 md:px-0">
-      <VenueCarousel media={venue.media} alt={venue.name} />
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+      <ImageCarousel images={venue.media} defaultAlt={`${venue.name} image`} />
+      <div className="flex flex-col md:flex-row md:items-center mt-4 md:justify-between gap-2 md:gap-1">
         <div className="flex items-center gap-3 mb-1 md:mb-0 flex-wrap">
           <h1 className="text-3xl font-bold mr-2">{venue.name}</h1>
           <div className="flex items-center gap-2 bg-yellow-50 px-3 py-1 rounded-lg shadow-sm">
