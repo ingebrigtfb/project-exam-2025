@@ -4,6 +4,7 @@ import VenueCard from '../components/VenueCard';
 import Paginator from '../components/venues/Paginator';
 import BookingSearch from '../components/venues/BookingSearch';
 import AuthModal from '../auth/components/AuthModal';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const VENUES_PER_PAGE = 12;
 
@@ -141,31 +142,37 @@ const Venues = () => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center px-2 md:px-6 py-8">
-      <div className="w-full flex flex-col items-center">
-        <BookingSearch onSearch={handleSearch} />
-      </div>
-      <div className="w-full flex justify-center mt-24">
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-[1400px] mx-auto">
-          {venues.map((venue) => (
-            <VenueCard
-              key={venue.id}
-              venue={venue}
-              isFavorite={favorites.includes(venue.id)}
-              onToggleFavorite={handleToggleFavorite}
-              onRequireAuth={() => setAuthOpen(true)}
-            />
-          ))}
+    <div className="container mx-auto px-4 py-8">
+      <BookingSearch onSearch={setSearch} />
+      {loading ? (
+        <div className="min-h-[400px] flex items-center justify-center">
+          <LoadingSpinner />
         </div>
-      </div>
-      <div className="w-full flex justify-center mt-12">
-        <Paginator
-          page={page}
-          totalPages={totalPages}
-          setPage={setPage}
-          loading={loading}
-        />
-      </div>
+      ) : (
+        <>
+          <div className="w-full flex justify-center mt-24">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-[1400px] mx-auto">
+              {venues.map(venue => (
+                <VenueCard
+                  key={venue.id}
+                  venue={venue}
+                  isFavorite={favorites.includes(venue.id)}
+                  onToggleFavorite={handleToggleFavorite}
+                  onRequireAuth={() => setAuthOpen(true)}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="w-full flex justify-center mt-12">
+            <Paginator
+              page={page}
+              totalPages={Math.ceil(totalVenues / VENUES_PER_PAGE)}
+              setPage={setPage}
+              loading={loading}
+            />
+          </div>
+        </>
+      )}
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </div>
   );

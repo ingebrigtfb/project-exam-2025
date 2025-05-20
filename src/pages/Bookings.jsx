@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getBookings, deleteBooking } from '../api/fetchBookings';
 import { useNavigate } from 'react-router-dom';
 import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 export default function Bookings() {
   const [bookings, setBookings] = useState([]);
@@ -47,7 +48,9 @@ export default function Bookings() {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading bookings...</div>
+        <div className="min-h-[400px] flex items-center justify-center">
+          <LoadingSpinner />
+        </div>
       </div>
     );
   }

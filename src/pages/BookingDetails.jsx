@@ -4,6 +4,7 @@ import { getBooking, deleteBooking } from '../api/fetchBookings';
 import { FaArrowLeft, FaCalendarAlt, FaUsers, FaMapMarkerAlt, FaWifi, FaParking, FaUtensils, FaPaw, FaEdit, FaTimes, FaUserFriends, FaMinus, FaPlus } from 'react-icons/fa';
 import ImageCarousel from '../components/imageCarousel/ImageCarousel';
 import DatePicker from 'react-datepicker';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../styles/datepicker-teal.css';
 
@@ -62,7 +63,9 @@ export default function BookingDetails() {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading booking details...</div>
+        <div className="min-h-[400px] flex items-center justify-center">
+          <LoadingSpinner />
+        </div>
       </div>
     );
   }
