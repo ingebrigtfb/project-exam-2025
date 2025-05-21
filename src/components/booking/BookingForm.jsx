@@ -2,34 +2,49 @@ import { useState, useEffect } from 'react';
 import { createBooking } from '../../api/fetchBookings';
 import { useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
-import { FaCalendarAlt, FaUsers, FaUserFriends, FaMinus, FaPlus } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserFriends, FaMinus, FaPlus } from 'react-icons/fa';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../styles/datepicker-teal.css';
 
-export default function BookingForm({ venue }) {
+export default function BookingForm({ venue, venueBookings }) {
   const [dateFrom, setDateFrom] = useState(null);
   const [dateTo, setDateTo] = useState(null);
   const [guests, setGuests] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [venueBookings, setVenueBookings] = useState([]);
   const navigate = useNavigate();
 
+  // Load saved search parameters on component mount
   useEffect(() => {
-    const fetchVenueBookings = async () => {
+    const savedParams = localStorage.getItem('lastSearchParams');
+    if (savedParams) {
       try {
-        const response = await fetch(`https://v2.api.noroff.dev/holidaze/venues/${venue.id}?_bookings=true`);
-        const data = await response.json();
-        if (data.data?.bookings) {
-          setVenueBookings(data.data.bookings);
+        const { checkIn, checkOut, guests: savedGuests } = JSON.parse(savedParams);
+        if (checkIn) {
+          // Create date at noon to avoid timezone issues
+          const date = new Date(checkIn);
+          date.setHours(12, 0, 0, 0);
+          setDateFrom(date);
         }
+        if (checkOut) {
+          // Create date at noon to avoid timezone issues
+          const date = new Date(checkOut);
+          date.setHours(12, 0, 0, 0);
+          setDateTo(date);
+        }
+        if (savedGuests) setGuests(savedGuests);
       } catch (err) {
-        console.error('Error fetching venue bookings:', err);
+        console.error('Error parsing saved search parameters:', err);
       }
-    };
+    }
+  }, []);
 
-    fetchVenueBookings();
-  }, [venue.id]);
+  // Clear search params when component unmounts
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('lastSearchParams');
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,7 +62,7 @@ export default function BookingForm({ venue }) {
       }
 
       // Check for overlap with existing bookings
-      const isOverlap = venueBookings.some(booking => {
+      const isOverlap = venueBookings?.some(booking => {
         const bookingStart = new Date(booking.dateFrom);
         const bookingEnd = new Date(booking.dateTo);
         // Overlap if (startA <= endB) && (startB <= endA)
@@ -84,10 +99,22 @@ export default function BookingForm({ venue }) {
 
   // Function to check if a date is booked
   const isDateBooked = (date) => {
+    if (!venueBookings) return false;
+    
+    // Set the time to noon for consistent comparison
+    const checkDate = new Date(date);
+    checkDate.setHours(12, 0, 0, 0);
+    
     return venueBookings.some(booking => {
       const bookingStart = new Date(booking.dateFrom);
       const bookingEnd = new Date(booking.dateTo);
-      return date >= bookingStart && date <= bookingEnd;
+      
+      // Set times to noon for consistent comparison
+      bookingStart.setHours(12, 0, 0, 0);
+      bookingEnd.setHours(12, 0, 0, 0);
+      
+      // Check if the date falls within the booking range
+      return checkDate >= bookingStart && checkDate <= bookingEnd;
     });
   };
 
@@ -107,7 +134,18 @@ export default function BookingForm({ venue }) {
         <div className="relative">
           <DatePicker
             selected={dateFrom}
-            onChange={date => setDateFrom(date)}
+            onChange={date => {
+              if (date) {
+                date.setHours(12, 0, 0, 0);
+                setDateFrom(date);
+                // Reset check-out date if it's before or equal to the new check-in date
+                if (dateTo && date >= dateTo) {
+                  setDateTo(null);
+                }
+              } else {
+                setDateFrom(null);
+              }
+            }}
             selectsStart
             startDate={dateFrom}
             endDate={dateTo}
@@ -127,7 +165,14 @@ export default function BookingForm({ venue }) {
         <div className="relative">
           <DatePicker
             selected={dateTo}
-            onChange={date => setDateTo(date)}
+            onChange={date => {
+              if (date) {
+                date.setHours(12, 0, 0, 0);
+                setDateTo(date);
+              } else {
+                setDateTo(null);
+              }
+            }}
             selectsEnd
             startDate={dateFrom}
             endDate={dateTo}

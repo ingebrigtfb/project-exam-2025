@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaSearch, FaMapMarkerAlt, FaUserFriends, FaRegCalendarAlt, FaUndo } from 'react-icons/fa';
+import { FaSearch, FaMapMarkerAlt, FaUserFriends, FaRegCalendarAlt, FaUndo, FaMinus, FaPlus } from 'react-icons/fa';
 import northernlights from '../../assets/northernlights.jpeg';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -17,12 +17,22 @@ export default function BookingSearch({ onSearch }) {
     e.preventDefault();
     let guestsNum = parseInt(guests, 10);
     if (isNaN(guestsNum) || guestsNum < 1) guestsNum = 1;
-    onSearch?.({
+    
+    // Set dates to noon to avoid timezone issues
+    const checkInDate = checkIn ? new Date(checkIn) : null;
+    const checkOutDate = checkOut ? new Date(checkOut) : null;
+    if (checkInDate) checkInDate.setHours(12, 0, 0, 0);
+    if (checkOutDate) checkOutDate.setHours(12, 0, 0, 0);
+
+    const searchParams = {
       where,
-      checkIn: checkIn ? checkIn.toISOString().split('T')[0] : '',
-      checkOut: checkOut ? checkOut.toISOString().split('T')[0] : '',
+      checkIn: checkInDate ? checkInDate.toISOString().split('T')[0] : '',
+      checkOut: checkOutDate ? checkOutDate.toISOString().split('T')[0] : '',
       guests: guestsNum
-    });
+    };
+    // Save search parameters to localStorage
+    localStorage.setItem('lastSearchParams', JSON.stringify(searchParams));
+    onSearch?.(searchParams);
     setGuests(String(guestsNum)); 
   };
 
@@ -70,6 +80,7 @@ export default function BookingSearch({ onSearch }) {
         guests={guests}
         setGuests={setGuests}
         handleSubmit={handleSubmit}
+        onSearch={onSearch}
       />
       <form
         onSubmit={handleSubmit}
@@ -98,9 +109,14 @@ export default function BookingSearch({ onSearch }) {
               <DatePicker
                 selected={checkIn}
                 onChange={date => {
-                  setCheckIn(date);
-                  if (checkOut && date && date >= checkOut) {
-                    setCheckOut(null);
+                  if (date) {
+                    date.setHours(12, 0, 0, 0);
+                    setCheckIn(date);
+                    if (checkOut && date >= checkOut) {
+                      setCheckOut(null);
+                    }
+                  } else {
+                    setCheckIn(null);
                   }
                 }}
                 selectsStart
@@ -123,7 +139,14 @@ export default function BookingSearch({ onSearch }) {
               <FaRegCalendarAlt className="text-xl text-[#0C5560]" />
               <DatePicker
                 selected={checkOut}
-                onChange={date => setCheckOut(date)}
+                onChange={date => {
+                  if (date) {
+                    date.setHours(12, 0, 0, 0);
+                    setCheckOut(date);
+                  } else {
+                    setCheckOut(null);
+                  }
+                }}
                 selectsEnd
                 startDate={checkIn}
                 endDate={checkOut}
@@ -141,20 +164,39 @@ export default function BookingSearch({ onSearch }) {
           <FaUserFriends className="text-2xl text-[#0C5560] mb-1 md:mb-0 md:mr-2" />
           <div>
             <div className="font-medium text-gray-700">Guests</div>
-            <input
-              type="number"
-              min={1}
-              value={guests}
-              onChange={e => {
-                const val = e.target.value;
-                if (val === '' || /^[0-9]+$/.test(val)) {
-                  setGuests(val);
-                }
-              }}
-              className="w-16 bg-transparent outline-none text-gray-700 placeholder-gray-400 text-base"
-              inputMode="numeric"
-              required
-            />
+            <div className="flex items-center gap-3 bg-gray-100 rounded-lg px-3 py-2 mt-1">
+              <button
+                type="button"
+                aria-label="Decrease guests"
+                onClick={() => setGuests(Math.max(1, parseInt(guests) - 1).toString())}
+                className="p-1 rounded-full bg-white border border-gray-300 hover:bg-gray-200 transition disabled:opacity-50"
+                disabled={parseInt(guests) <= 1}
+              >
+                <FaMinus className="h-4 w-4" />
+              </button>
+              <input
+                type="number"
+                min={1}
+                value={guests}
+                onChange={e => {
+                  const val = e.target.value;
+                  if (val === '' || /^[0-9]+$/.test(val)) {
+                    setGuests(val);
+                  }
+                }}
+                className="w-12 text-center bg-transparent outline-none text-base font-semibold"
+                inputMode="numeric"
+                required
+              />
+              <button
+                type="button"
+                aria-label="Increase guests"
+                onClick={() => setGuests((parseInt(guests) + 1).toString())}
+                className="p-1 rounded-full bg-white border border-gray-300 hover:bg-gray-200 transition"
+              >
+                <FaPlus className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
         <div className="flex gap-2 ml-0 md:ml-4 mt-2 md:mt-0">

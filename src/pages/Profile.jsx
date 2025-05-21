@@ -5,10 +5,13 @@ import ProfileInfo from '../components/profile/ProfileInfo';
 import ProfileTabs from '../components/profile/ProfileTabs';
 import AccountSettings from '../components/profile/AccountSettings';
 import FavoritesList from '../components/profile/FavoritesList';
+import VenueManagerGuestMessage from '../components/profile/VenueManagerGuestMessage';
+import ManagerDashboard from '../components/VenueManager/ManagerDashboard';
+import MyVenueCard from '../components/cards/MyVenueCard';
 
 export default function Profile() {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')));
-  const [activeTab, setActiveTab] = useState('bookings');
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('profileActiveTab') || 'bookings');
   const favoritesKey = user ? `favorites_${user.name}` : null;
   const [favorites, setFavorites] = useState(() => {
     if (!favoritesKey) return [];
@@ -41,6 +44,12 @@ export default function Profile() {
     }
   }, [favoritesKey]);
 
+  // Persist active tab in localStorage
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    localStorage.setItem('profileActiveTab', tab);
+  };
+
   return (
     <div className="w-full">
       <ProfileBanner banner={user?.banner} />
@@ -56,10 +65,12 @@ export default function Profile() {
         />
         <ProfileTabs
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={handleTabChange}
         />
         <div className="p-6">
           {activeTab === 'bookings' && null}
+          {activeTab === 'venues' && !user?.venueManager && <VenueManagerGuestMessage />}
+          {activeTab === 'venues' && user?.venueManager && <ManagerDashboard user={user} />}
           {activeTab === 'favorites' && <FavoritesList user={user} favorites={favorites} onToggleFavorite={handleToggleFavorite} />}
           {activeTab === 'settings' && (
             <AccountSettings user={user} setUser={setUser} />

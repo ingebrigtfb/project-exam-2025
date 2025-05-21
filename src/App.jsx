@@ -3,8 +3,6 @@ import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import Venues from './pages/Venues';
 import VenueDetails from './pages/VenueDetails';
-import Register from './pages/Register';
-import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Bookings from './pages/Bookings';
 import ManagerDashboard from './pages/ManagerDashboard';
@@ -13,6 +11,8 @@ import ManageBookings from './pages/ManageBookings';
 import RequireAuth from './auth/RequireAuth';
 import BookingDetails from './pages/BookingDetails';
 import BookingConfirmation from './pages/BookingConfirmation';
+import CreateVenue from './components/VenueManager/CreateVenue';
+import EditVenue from './components/VenueManager/EditVenue';
 
 
 const App = () => (
@@ -25,11 +25,19 @@ const App = () => (
           <VenueDetails />
         </RequireAuth>
       } />
-      <Route path="register" element={<Register />} />
-      <Route path="login" element={<Login />} />
       <Route path="profile" element={
         <RequireAuth>
           <Profile />
+        </RequireAuth>
+      } />
+      <Route path="profile/create-venue" element={
+        <RequireAuth>
+          <CreateVenue />
+        </RequireAuth>
+      } />
+      <Route path="profile/edit-venue/:id" element={
+        <RequireAuth>
+          <EditVenue />
         </RequireAuth>
       } />
       <Route path="bookings" element={

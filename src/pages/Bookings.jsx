@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getBookings, deleteBooking } from '../api/fetchBookings';
 import { useNavigate } from 'react-router-dom';
-import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaCalendarAlt, FaMapMarkerAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 export default function Bookings() {
@@ -9,6 +9,36 @@ export default function Bookings() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const upcomingScrollRef = useRef(null);
+  const pastScrollRef = useRef(null);
+
+  // State for arrow visibility
+  const [upcomingScroll, setUpcomingScroll] = useState({ atStart: true, atEnd: false });
+  const [pastScroll, setPastScroll] = useState({ atStart: true, atEnd: false });
+
+  const updateScrollState = (ref, setState) => {
+    if (!ref.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = ref.current;
+    setState({
+      atStart: scrollLeft <= 0,
+      atEnd: scrollLeft + clientWidth >= scrollWidth - 1, // -1 for rounding errors
+    });
+  };
+
+  const scrollLeft = (ref, setState) => {
+    if (ref.current) {
+      ref.current.scrollBy({ left: -300, behavior: 'smooth' });
+      setTimeout(() => updateScrollState(ref, setState), 300);
+    }
+  };
+
+  const scrollRight = (ref, setState) => {
+    if (ref.current) {
+      ref.current.scrollBy({ left: 300, behavior: 'smooth' });
+      setTimeout(() => updateScrollState(ref, setState), 300);
+    }
+  };
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -24,6 +54,12 @@ export default function Bookings() {
 
     fetchBookings();
   }, []);
+
+  // Update scroll state on mount and when bookings change
+  useEffect(() => {
+    updateScrollState(upcomingScrollRef, setUpcomingScroll);
+    updateScrollState(pastScrollRef, setPastScroll);
+  }, [bookings]);
 
   const now = new Date();
   const upcomingBookings = bookings
@@ -75,8 +111,22 @@ export default function Bookings() {
           {upcomingBookings.length === 0 ? (
             <p className="text-gray-500">No upcoming bookings</p>
           ) : (
-            <div className="w-full">
-              <div className="overflow-x-auto pb-4 lg:scrollbar-hide">
+            <div className="w-full flex items-center gap-2">
+              {upcomingBookings.length > 1 && !upcomingScroll.atStart && (
+                <button
+                  className="bg-white/80 rounded-full p-2 shadow hover:bg-white flex-shrink-0"
+                  onClick={() => scrollLeft(upcomingScrollRef, setUpcomingScroll)}
+                  aria-label="Scroll left"
+                >
+                  <FaChevronLeft size={20} />
+                </button>
+              )}
+              <div
+                ref={upcomingScrollRef}
+                className="overflow-x-auto pb-4 lg:scrollbar-hide flex-1"
+                style={{ scrollBehavior: 'smooth' }}
+                onScroll={() => updateScrollState(upcomingScrollRef, setUpcomingScroll)}
+              >
                 <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-end lg:gap-6 min-w-min">
                   {upcomingBookings.map(booking => (
                     <div key={booking.id} className="flex flex-col items-center">
@@ -131,6 +181,15 @@ export default function Bookings() {
                   ))}
                 </div>
               </div>
+              {upcomingBookings.length > 1 && !upcomingScroll.atEnd && (
+                <button
+                  className="bg-white/80 rounded-full p-2 shadow hover:bg-white flex-shrink-0"
+                  onClick={() => scrollRight(upcomingScrollRef, setUpcomingScroll)}
+                  aria-label="Scroll right"
+                >
+                  <FaChevronRight size={20} />
+                </button>
+              )}
             </div>
           )}
         </section>
@@ -144,8 +203,22 @@ export default function Bookings() {
           {pastBookings.length === 0 ? (
             <p className="text-gray-500">No past bookings</p>
           ) : (
-            <div className="w-full">
-              <div className="overflow-x-auto pb-4 lg:scrollbar-hide">
+            <div className="w-full flex items-center gap-2">
+              {pastBookings.length > 1 && !pastScroll.atStart && (
+                <button
+                  className="bg-white/80 rounded-full p-2 shadow hover:bg-white flex-shrink-0"
+                  onClick={() => scrollLeft(pastScrollRef, setPastScroll)}
+                  aria-label="Scroll left"
+                >
+                  <FaChevronLeft size={20} />
+                </button>
+              )}
+              <div
+                ref={pastScrollRef}
+                className="overflow-x-auto pb-4 lg:scrollbar-hide flex-1"
+                style={{ scrollBehavior: 'smooth' }}
+                onScroll={() => updateScrollState(pastScrollRef, setPastScroll)}
+              >
                 <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-stretch lg:gap-6 min-w-min">
                   {pastBookings.map(booking => (
                     <div 
@@ -195,6 +268,15 @@ export default function Bookings() {
                   ))}
                 </div>
               </div>
+              {pastBookings.length > 1 && !pastScroll.atEnd && (
+                <button
+                  className="bg-white/80 rounded-full p-2 shadow hover:bg-white flex-shrink-0"
+                  onClick={() => scrollRight(pastScrollRef, setPastScroll)}
+                  aria-label="Scroll right"
+                >
+                  <FaChevronRight size={20} />
+                </button>
+              )}
             </div>
           )}
         </section>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../../assets/background+overlay.png';
-import VenueCard from '../VenueCard';
+import VenueCard from '../cards/VenueCard';
 import AuthModal from '../../auth/components/AuthModal';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';

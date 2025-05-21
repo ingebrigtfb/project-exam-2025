@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { fetchVenues } from '../api/fetchVenues';
-import VenueCard from '../components/VenueCard';
+import VenueCard from '../components/cards/VenueCard';
 import Paginator from '../components/venues/Paginator';
 import BookingSearch from '../components/venues/BookingSearch';
 import AuthModal from '../auth/components/AuthModal';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { FaSearch } from 'react-icons/fa';
 
 const VENUES_PER_PAGE = 12;
 
@@ -147,6 +148,16 @@ const Venues = () => {
       {loading ? (
         <div className="min-h-[400px] flex items-center justify-center">
           <LoadingSpinner />
+        </div>
+      ) : venues.length === 0 ? (
+        <div className="min-h-[400px] flex flex-col items-center justify-center text-center px-4">
+          <FaSearch className="text-6xl text-gray-300 mb-4" />
+          <h2 className="text-2xl font-semibold text-gray-700 mb-2">No venues found</h2>
+          <p className="text-gray-500 max-w-md">
+            {search.where || search.checkIn || search.checkOut || search.guests > 1
+              ? "We couldn't find any venues matching your search criteria. Try adjusting your search or clear the filters to browse all venues."
+              : "No venues are currently available. Please check back later."}
+          </p>
         </div>
       ) : (
         <>

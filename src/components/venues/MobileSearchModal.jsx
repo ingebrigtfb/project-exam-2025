@@ -1,18 +1,30 @@
-import { FaSearch, FaUndo } from 'react-icons/fa';
+import { FaSearch, FaUndo, FaUserFriends, FaMinus, FaPlus } from 'react-icons/fa';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../styles/datepicker-teal.css';
 
 export default function MobileSearchModal({
-  open, onClose, where, setWhere, checkIn, setCheckIn, checkOut, setCheckOut, guests, setGuests, handleSubmit
+  open, onClose, where, setWhere, checkIn, setCheckIn, checkOut, setCheckOut, guests, setGuests, handleSubmit, onSearch
 }) {
   if (!open) return null;
 
   const handleReset = () => {
+    // Clear all the values
     setWhere('');
     setCheckIn(null);
     setCheckOut(null);
     setGuests('1');
+    
+    // Call onSearch directly with cleared values
+    onSearch?.({
+      where: '',
+      checkIn: '',
+      checkOut: '',
+      guests: 1
+    });
+    
+    // Close the modal
+    onClose();
   };
 
   return (
@@ -20,7 +32,24 @@ export default function MobileSearchModal({
       <div className="bg-white w-full max-w-md mx-auto rounded-2xl shadow-xl p-6 relative flex flex-col">
         <button className="absolute top-3 right-3 text-2xl text-gray-400" onClick={onClose} aria-label="Close">&times;</button>
         <h2 className="text-xl font-bold mb-4">Search</h2>
-        <form onSubmit={e => { handleSubmit(e); onClose(); }} className="flex flex-col gap-4">
+        <form onSubmit={e => { 
+          e.preventDefault();
+          // Set dates to noon to avoid timezone issues
+          const checkInDate = checkIn ? new Date(checkIn) : null;
+          const checkOutDate = checkOut ? new Date(checkOut) : null;
+          if (checkInDate) checkInDate.setHours(12, 0, 0, 0);
+          if (checkOutDate) checkOutDate.setHours(12, 0, 0, 0);
+
+          const searchParams = {
+            where,
+            checkIn: checkInDate ? checkInDate.toISOString().split('T')[0] : '',
+            checkOut: checkOutDate ? checkOutDate.toISOString().split('T')[0] : '',
+            guests: parseInt(guests, 10)
+          };
+          localStorage.setItem('lastSearchParams', JSON.stringify(searchParams));
+          handleSubmit(e); 
+          onClose(); 
+        }} className="flex flex-col gap-4">
           <div>
             <label className="block font-medium text-gray-700 mb-1">Where</label>
             <input
@@ -37,9 +66,14 @@ export default function MobileSearchModal({
             <DatePicker
               selected={checkIn}
               onChange={date => {
-                setCheckIn(date);
-                if (checkOut && date && date >= checkOut) {
-                  setCheckOut(null);
+                if (date) {
+                  date.setHours(12, 0, 0, 0);
+                  setCheckIn(date);
+                  if (checkOut && date >= checkOut) {
+                    setCheckOut(null);
+                  }
+                } else {
+                  setCheckIn(null);
                 }
               }}
               selectsStart
@@ -57,7 +91,14 @@ export default function MobileSearchModal({
             <label className="block font-medium text-gray-700 mb-1">Check out</label>
             <DatePicker
               selected={checkOut}
-              onChange={date => setCheckOut(date)}
+              onChange={date => {
+                if (date) {
+                  date.setHours(12, 0, 0, 0);
+                  setCheckOut(date);
+                } else {
+                  setCheckOut(null);
+                }
+              }}
               selectsEnd
               startDate={checkIn}
               endDate={checkOut}
@@ -71,20 +112,40 @@ export default function MobileSearchModal({
           </div>
           <div>
             <label className="block font-medium text-gray-700 mb-1">Guests</label>
-            <input
-              type="number"
-              min={1}
-              value={guests}
-              onChange={e => {
-                const val = e.target.value;
-                if (val === '' || /^[0-9]+$/.test(val)) {
-                  setGuests(val);
-                }
-              }}
-              className="w-full bg-gray-100 rounded-lg px-3 py-2 outline-none text-gray-700 placeholder-gray-400 text-base"
-              inputMode="numeric"
-              required
-            />
+            <div className="flex items-center gap-3 bg-gray-100 rounded-lg px-3 py-2">
+              <FaUserFriends className="text-xl text-[#0C5560]" />
+              <button
+                type="button"
+                aria-label="Decrease guests"
+                onClick={() => setGuests(Math.max(1, parseInt(guests) - 1).toString())}
+                className="p-1 rounded-full bg-white border border-gray-300 hover:bg-gray-200 transition disabled:opacity-50"
+                disabled={parseInt(guests) <= 1}
+              >
+                <FaMinus className="h-4 w-4" />
+              </button>
+              <input
+                type="number"
+                min={1}
+                value={guests}
+                onChange={e => {
+                  const val = e.target.value;
+                  if (val === '' || /^[0-9]+$/.test(val)) {
+                    setGuests(val);
+                  }
+                }}
+                className="w-12 text-center bg-transparent outline-none text-base font-semibold"
+                inputMode="numeric"
+                required
+              />
+              <button
+                type="button"
+                aria-label="Increase guests"
+                onClick={() => setGuests((parseInt(guests) + 1).toString())}
+                className="p-1 rounded-full bg-white border border-gray-300 hover:bg-gray-200 transition"
+              >
+                <FaPlus className="h-4 w-4" />
+              </button>
+            </div>
           </div>
           <div className="flex gap-2 mt-2">
             <button

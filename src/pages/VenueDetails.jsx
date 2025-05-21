@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaMapMarkerAlt, FaWifi, FaParking, FaUtensils, FaPaw, FaUser, FaStar, FaRegStar } from 'react-icons/fa';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { FaArrowLeft, FaMapMarkerAlt, FaWifi, FaParking, FaUtensils, FaPaw, FaUser, FaStar, FaRegStar, FaEdit, FaTrash } from 'react-icons/fa';
 import ImageCarousel from '../components/imageCarousel/ImageCarousel';
 import VenueBooking from '../components/venue-detail/VenueBooking';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -10,9 +10,12 @@ const API_URL = 'https://v2.api.noroff.dev/holidaze/venues';
 const VenueDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [venue, setVenue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     const fetchVenue = async () => {
@@ -31,6 +34,37 @@ const VenueDetails = () => {
     };
     fetchVenue();
   }, [id]);
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this venue? This action cannot be undone.')) {
+      return;
+    }
+    setDeleteLoading(true);
+    setDeleteError('');
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${user.accessToken}`,
+          'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY
+        }
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.errors?.[0]?.message || 'Failed to delete venue');
+      }
+      navigate('/profile');
+    } catch (err) {
+      setDeleteError(err.message);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleEdit = () => {
+    navigate(`/profile/edit-venue/${id}`);
+  };
 
   if (loading) {
     return (
@@ -59,15 +93,18 @@ const VenueDetails = () => {
   }
 
   const rating = Math.round(venue.rating || 0);
+  const user = JSON.parse(localStorage.getItem('user'));
+  const isOwner = user && venue.owner?.name === user.name;
+  const cameFromProfile = location.state?.from === 'profile';
 
   return (
     <div className="container mx-auto px-4 py-8">
       <button
-        onClick={() => navigate('/venues')}
+        onClick={() => navigate(cameFromProfile ? '/profile' : '/venues')}
         className="mb-6 text-gray-600 hover:text-gray-800 transition-colors duration-300 flex items-center gap-2"
       >
         <FaArrowLeft className="h-5 w-5" />
-        Back to Venues
+        {cameFromProfile ? 'Back to Profile' : 'Back to Venues'}
       </button>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -83,7 +120,31 @@ const VenueDetails = () => {
           {/* Venue Information */}
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h1 className="text-3xl font-bold mb-2">{venue.name}</h1>
+              <div className="flex justify-between items-start mb-6">
+                <h2 className="text-2xl font-semibold">{venue.name}</h2>
+                {venue.owner?.name === user?.name && (
+                  <div className="flex gap-2">
+                    <button
+                      className="bg-white/80 hover:bg-white rounded-full p-2 shadow text-[#0C5560] transition"
+                      onClick={() => navigate(`/profile/edit-venue/${venue.id}`, { state: { from: location.state?.from } })}
+                      title="Edit venue"
+                    >
+                      <FaEdit size={20} />
+                    </button>
+                    <button
+                      className="bg-white/80 hover:bg-white rounded-full p-2 shadow text-red-500 transition"
+                      onClick={handleDelete}
+                      disabled={deleteLoading}
+                      title="Delete venue"
+                    >
+                      <FaTrash size={20} />
+                    </button>
+                  </div>
+                )}
+              </div>
+              {deleteError && (
+                <div className="text-red-500 text-sm mb-4">{deleteError}</div>
+              )}
               <div className="flex items-center gap-1 text-yellow-400 text-sm mb-4">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) =>

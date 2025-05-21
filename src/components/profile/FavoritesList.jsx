@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import VenueCard from '../VenueCard';
+import VenueCard from '../cards/VenueCard';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 export default function FavoritesList({ user, favorites, onToggleFavorite }) {
