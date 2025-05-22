@@ -45,6 +45,17 @@ const Venues = () => {
     saveFavorites(newFavs);
   };
 
+  const handleAuthSuccess = (userData) => {
+    const userId = userData.name;
+    const newFavoritesKey = `favorites_${userId}`;
+    
+    // Update user and favorites key after login
+    setFavorites(JSON.parse(localStorage.getItem(newFavoritesKey)) || []);
+    setAuthOpen(false);
+    
+    // Note: Redirection is handled by the AuthModal component
+  };
+
   const loadVenues = async (pageNum = page, searchParams = search) => {
     setLoading(true);
     let url;
@@ -64,14 +75,13 @@ const Venues = () => {
         setTotalVenues(venuesList.length);
       }
     } else {
-      // Use API's maxGuests_gte parameter when filtering by guests
       const guestsFilter = searchParams.guests ? `&maxGuests_gte=${searchParams.guests}` : '';
       url = `https://v2.api.noroff.dev/holidaze/venues?limit=${VENUES_PER_PAGE}&page=${pageNum}${guestsFilter}&sort=created&sortOrder=desc`;
       const res = await fetch(url);
       const data = await res.json();
       venuesList = data.data || [];
       
-      // For guest-only search, we need to get all venues that match the criteria
+  
       if (searchParams.guests) {
         setTotalVenues(data.meta?.totalCount || 0);
       } else {
@@ -83,15 +93,21 @@ const Venues = () => {
     if (searchParams.checkIn && searchParams.checkOut) {
       const checkIn = new Date(searchParams.checkIn);
       const checkOut = new Date(searchParams.checkOut);
+      
       // Helper to check date overlap
       const isDateOverlap = (aStart, aEnd, bStart, bEnd) => {
         return (aStart <= bEnd) && (bStart <= aEnd);
       };
+
       // Fetch bookings for each venue in parallel
       const venuesWithBookings = await Promise.all(
         venuesList.map(async (venue) => {
           try {
+            // Use the public venue endpoint with _bookings=true
             const res = await fetch(`https://v2.api.noroff.dev/holidaze/venues/${venue.id}?_bookings=true`);
+            if (!res.ok) {
+              return { ...venue, bookings: [] };
+            }
             const data = await res.json();
             return { ...venue, bookings: data.data.bookings || [] };
           } catch {
@@ -99,6 +115,7 @@ const Venues = () => {
           }
         })
       );
+
       // Filter out venues with overlapping bookings
       venuesList = venuesWithBookings.filter(venue => {
         return !venue.bookings.some(booking => {
@@ -184,7 +201,11 @@ const Venues = () => {
           </div>
         </>
       )}
-      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+      <AuthModal 
+        open={authOpen} 
+        onClose={() => setAuthOpen(false)} 
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   );
 };

@@ -11,6 +11,7 @@ export default function Login({ onSuccess, onSwitch }) {
     setLoading(true);
     setError('');
     try {
+      // Login request
       const res = await fetch('https://v2.api.noroff.dev/auth/login', {
         method: 'POST',
         headers: {
@@ -21,8 +22,25 @@ export default function Login({ onSuccess, onSwitch }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.errors?.[0]?.message || 'Login failed');
-      localStorage.setItem('user', JSON.stringify(data.data));
-      if (onSuccess) onSuccess(data.data);
+
+      // Fetch user profile data
+      const profileRes = await fetch('https://v2.api.noroff.dev/holidaze/profiles/' + data.data.name, {
+        headers: {
+          'Authorization': `Bearer ${data.data.accessToken}`,
+          'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY
+        }
+      });
+      const profileData = await profileRes.json();
+      if (!profileRes.ok) throw new Error(profileData.errors?.[0]?.message || 'Failed to fetch profile');
+
+      // Combine login data with profile data
+      const userData = {
+        ...data.data,
+        venueManager: profileData.data.venueManager
+      };
+
+      localStorage.setItem('user', JSON.stringify(userData));
+      if (onSuccess) onSuccess(userData);
     } catch (err) {
       setError(err.message);
     } finally {

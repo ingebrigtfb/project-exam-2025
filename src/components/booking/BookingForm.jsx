@@ -2,16 +2,19 @@ import { useState, useEffect } from 'react';
 import { createBooking } from '../../api/fetchBookings';
 import { useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
-import { FaCalendarAlt, FaUserFriends, FaMinus, FaPlus } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserFriends, FaMinus, FaPlus, FaLock } from 'react-icons/fa';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../styles/datepicker-teal.css';
+import { useAuth } from '../../contexts/AuthContext';
 
-export default function BookingForm({ venue, venueBookings }) {
+export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
+  const { user } = useAuth();
   const [dateFrom, setDateFrom] = useState(null);
   const [dateTo, setDateTo] = useState(null);
   const [guests, setGuests] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showLoginMessage, setShowLoginMessage] = useState(false);
   const navigate = useNavigate();
 
   // Load saved search parameters on component mount
@@ -46,92 +49,83 @@ export default function BookingForm({ venue, venueBookings }) {
     };
   }, []);
 
+  // Hide login message if user is detected
+  useEffect(() => {
+    if (user && showLoginMessage) {
+      setShowLoginMessage(false);
+    }
+  }, [user, showLoginMessage]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    if (!user) {
+      setShowLoginMessage(true);
+      // Don't immediately trigger auth modal, just show the message
+      return;
+    }
+
     setError('');
+    if (!dateFrom || !dateTo) {
+      setError('Please select both check-in and check-out dates');
+      return;
+    }
 
+    if (dateFrom >= dateTo) {
+      setError('Check-out date must be after check-in date');
+      return;
+    }
+
+    if (guests < 1) {
+      setError('Number of guests must be at least 1');
+      return;
+    }
+
+    if (guests > venue.maxGuests) {
+      setError(`Maximum ${venue.maxGuests} guests allowed`);
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      // Validate dates
-      if (!dateFrom || !dateTo) {
-        throw new Error('Please select both check-in and check-out dates');
-      }
-
-      if (dateFrom >= dateTo) {
-        throw new Error('Check-out date must be after check-in date');
-      }
-
-      // Check for overlap with existing bookings
-      const isOverlap = venueBookings?.some(booking => {
-        const bookingStart = new Date(booking.dateFrom);
-        const bookingEnd = new Date(booking.dateTo);
-        // Overlap if (startA <= endB) && (startB <= endA)
-        return (dateFrom <= bookingEnd) && (bookingStart <= dateTo);
-      });
-      if (isOverlap) {
-        throw new Error('Selected dates overlap with an existing booking. Please choose another period.');
-      }
-
-      // Validate guests
-      if (guests < 1) {
-        throw new Error('Number of guests must be at least 1');
-      }
-
-      if (guests > venue.maxGuests) {
-        throw new Error(`Maximum ${venue.maxGuests} guests allowed`);
-      }
-
-      const bookingData = {
+      const booking = await createBooking({
+        venueId: venue.id,
         dateFrom: dateFrom.toISOString(),
         dateTo: dateTo.toISOString(),
-        guests,
-        venueId: venue.id
-      };
-
-      const created = await createBooking(bookingData);
-      navigate('/booking-confirmation', { state: { booking: created, isEdit: false } });
+        guests
+      });
+      navigate(`/booking-confirmation/${booking.id}`);
     } catch (err) {
-      setError(err.message || 'Failed to create booking');
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Function to check if a date is booked
   const isDateBooked = (date) => {
-    if (!venueBookings) return false;
+    if (!venueBookings || !Array.isArray(venueBookings) || venueBookings.length === 0) return false;
     
-    // Set the time to noon for consistent comparison
+    // Convert the date to midnight for comparison
     const checkDate = new Date(date);
-    checkDate.setHours(12, 0, 0, 0);
+    checkDate.setHours(0, 0, 0, 0);
     
     return venueBookings.some(booking => {
+      // Convert booking dates to local midnight
       const bookingStart = new Date(booking.dateFrom);
+      bookingStart.setHours(0, 0, 0, 0);
+      
       const bookingEnd = new Date(booking.dateTo);
+      bookingEnd.setHours(0, 0, 0, 0);
       
-      // Set times to noon for consistent comparison
-      bookingStart.setHours(12, 0, 0, 0);
-      bookingEnd.setHours(12, 0, 0, 0);
-      
-      // Check if the date falls within the booking range
+      // Check if the date falls within any booking period
       return checkDate >= bookingStart && checkDate <= bookingEnd;
     });
   };
 
-  // Calculate total price
-  const calculateTotalPrice = () => {
-    if (!dateFrom || !dateTo) return null;
-    const nights = Math.ceil((dateTo - dateFrom) / (1000 * 60 * 60 * 24));
-    return nights * venue.price;
-  };
-
-  const totalPrice = calculateTotalPrice();
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Check-in date</label>
-        <div className="relative">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
           <DatePicker
             selected={dateFrom}
             onChange={date => {
@@ -156,13 +150,9 @@ export default function BookingForm({ venue, venueBookings }) {
             dateFormat="dd/MM/yy"
             required
           />
-          <FaCalendarAlt className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Check-out date</label>
-        <div className="relative">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Check-out</label>
           <DatePicker
             selected={dateTo}
             onChange={date => {
@@ -183,71 +173,69 @@ export default function BookingForm({ venue, venueBookings }) {
             dateFormat="dd/MM/yy"
             required
           />
-          <FaCalendarAlt className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Number of guests</label>
+          <div className="flex items-center gap-3 bg-gray-100 rounded-lg px-3 py-2">
+            <FaUserFriends className="text-xl text-[#0C5560]" />
+            <button
+              type="button"
+              aria-label="Decrease guests"
+              onClick={() => setGuests(Math.max(1, guests - 1))}
+              className="p-1 rounded-full bg-white border border-gray-300 hover:bg-gray-200 transition disabled:opacity-50"
+              disabled={guests <= 1}
+            >
+              <FaMinus className="h-4 w-4" />
+            </button>
+            <input
+              type="number"
+              value={guests}
+              onChange={e => {
+                const val = parseInt(e.target.value);
+                if (!isNaN(val)) setGuests(val);
+              }}
+              min="1"
+              max={venue.maxGuests}
+              className="w-12 text-center bg-transparent outline-none text-base font-semibold"
+              required
+            />
+            <button
+              type="button"
+              aria-label="Increase guests"
+              onClick={() => setGuests(Math.min(venue.maxGuests, guests + 1))}
+              className="p-1 rounded-full bg-white border border-gray-300 hover:bg-gray-200 transition disabled:opacity-50"
+              disabled={guests >= venue.maxGuests}
+            >
+              <FaPlus className="h-4 w-4" />
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">Maximum {venue.maxGuests} guests</p>
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Number of guests</label>
-        <div className="flex items-center gap-3 bg-gray-100 rounded-lg px-3 py-2">
-          <FaUserFriends className="text-xl text-[#0C5560]" />
-          <button
-            type="button"
-            aria-label="Decrease guests"
-            onClick={() => setGuests(Math.max(1, guests - 1))}
-            className="p-1 rounded-full bg-white border border-gray-300 hover:bg-gray-200 transition disabled:opacity-50"
-            disabled={guests <= 1}
-          >
-            <FaMinus className="h-4 w-4" />
-          </button>
-          <input
-            type="number"
-            value={guests}
-            onChange={e => {
-              const val = parseInt(e.target.value);
-              if (!isNaN(val)) setGuests(val);
-            }}
-            min="1"
-            max={venue.maxGuests}
-            className="w-12 text-center bg-transparent outline-none text-base font-semibold"
-            required
-          />
-          <button
-            type="button"
-            aria-label="Increase guests"
-            onClick={() => setGuests(Math.min(venue.maxGuests, guests + 1))}
-            className="p-1 rounded-full bg-white border border-gray-300 hover:bg-gray-200 transition disabled:opacity-50"
-            disabled={guests >= venue.maxGuests}
-          >
-            <FaPlus className="h-4 w-4" />
-          </button>
-        </div>
-        <p className="text-xs text-gray-500 mt-1">Maximum {venue.maxGuests} guests</p>
-      </div>
-
-      {totalPrice && (
-        <div className="border-t pt-4 mt-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm text-gray-600">Total price</p>
-              <p className="text-lg font-bold text-[#0C5560]">${totalPrice}</p>
-            </div>
-            <p className="text-sm text-gray-500">
-              {Math.ceil((dateTo - dateFrom) / (1000 * 60 * 60 * 24))} nights
+      {showLoginMessage && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 flex items-start">
+          <FaLock className="text-blue-500 mt-1 mr-3 flex-shrink-0" />
+          <div className="w-full">
+            <p className="text-blue-700 font-medium">Login required</p>
+            <p className="text-blue-600 text-sm mt-1 mb-3">
+              Please log in or register to book this venue. Your booking details will be saved.
             </p>
           </div>
         </div>
       )}
 
-      {error && <div className="text-red-500 text-sm">{error}</div>}
+      {error && (
+        <div className="text-red-500 text-sm">{error}</div>
+      )}
 
       <button
         type="submit"
-        disabled={isLoading || !dateFrom || !dateTo}
-        className="w-full bg-[#0C5560] text-white py-2 px-4 rounded-md hover:bg-[#094147] transition-colors duration-300 font-medium text-base disabled:opacity-50"
+        disabled={isLoading}
+        className="w-full bg-[#0C5560] text-white py-2 px-4 rounded-md hover:bg-[#094147] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? 'Processing...' : 'Book Now'}
       </button>
     </form>
   );
-} 
+}

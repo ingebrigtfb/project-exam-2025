@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import VenueCard from '../cards/VenueCard';
 import LoadingSpinner from '../common/LoadingSpinner';
+import { FaTrash } from 'react-icons/fa';
 
 export default function FavoritesList({ user, favorites, onToggleFavorite }) {
   const [favoriteVenues, setFavoriteVenues] = useState([]);
@@ -29,6 +30,12 @@ export default function FavoritesList({ user, favorites, onToggleFavorite }) {
     });
   }, [user, favorites]);
 
+  const handleClearAll = () => {
+    if (window.confirm('Are you sure you want to remove all favorites? This action cannot be undone.')) {
+      onToggleFavorite(null, true); // true indicates clear all
+    }
+  };
+
   if (!user) return null;
 
   if (loading) {
@@ -46,14 +53,24 @@ export default function FavoritesList({ user, favorites, onToggleFavorite }) {
   }
 
   return (
-    <div className="w-full flex justify-center mt-24">
+    <div className="w-full">
+      <div className="flex justify-end mb-6">
+        <button
+          onClick={handleClearAll}
+          className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+        >
+          <FaTrash />
+          Clear All
+        </button>
+      </div>
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-[1400px] mx-auto">
         {favoriteVenues.map(venue => (
           <VenueCard 
             key={venue.id} 
             venue={venue} 
             isFavorite={true} 
-            onToggleFavorite={onToggleFavorite} 
+            onToggleFavorite={onToggleFavorite}
+            fromFavorites={true}
           />
         ))}
       </div>

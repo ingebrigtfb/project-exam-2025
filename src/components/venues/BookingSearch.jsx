@@ -52,7 +52,7 @@ export default function BookingSearch({ onSearch }) {
   return (
     <div className="w-full flex flex-col items-center">
       <div
-        className="w-full max-w-[1100px] h-60 md:h-72 rounded-[20px] md:rounded-[56px] overflow-hidden flex items-center justify-center relative z-10 shadow-lg"
+        className="w-full max-w-[1400px] h-60 md:h-72 rounded-[20px] md:rounded-[56px] overflow-hidden flex items-center justify-center relative z-10 shadow-lg"
         style={{ background: `url(${northernlights}) center/cover no-repeat` }}
       >
         <h1 className="text-3xl md:text-5xl font-bold text-white text-center drop-shadow-lg tracking-wide">
@@ -84,7 +84,7 @@ export default function BookingSearch({ onSearch }) {
       />
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-[900px] bg-white rounded-2xl md:rounded-3xl shadow-lg flex flex-col md:flex-row items-stretch md:items-center px-2 sm:px-4 py-4 md:py-4 gap-4 md:gap-0 -mt-12 relative z-20 hidden md:flex"
+        className="w-full max-w-[1100px] bg-white rounded-2xl md:rounded-3xl shadow-lg flex flex-col md:flex-row items-stretch md:items-center px-2 sm:px-4 py-4 md:py-4 gap-4 md:gap-0 -mt-12 relative z-20 hidden md:flex"
         style={{ minHeight: 100 }}
       >
         <div className="flex-1 flex flex-col items-start md:items-start md:flex-row md:gap-2 border-b md:border-b-0 md:border-r border-gray-200 px-1 sm:px-2 md:px-6 py-2 md:py-0 w-full md:w-auto">

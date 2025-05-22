@@ -4,6 +4,8 @@ import { FaArrowLeft, FaMapMarkerAlt, FaWifi, FaParking, FaUtensils, FaPaw, FaUs
 import ImageCarousel from '../components/imageCarousel/ImageCarousel';
 import VenueBooking from '../components/venue-detail/VenueBooking';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import AuthModal from '../auth/components/AuthModal';
+import { createBooking } from '../api/fetchBookings';
 
 const API_URL = 'https://v2.api.noroff.dev/holidaze/venues';
 
@@ -12,10 +14,13 @@ const VenueDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [venue, setVenue] = useState(null);
+  const [venueBookings, setVenueBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingBooking, setPendingBooking] = useState(null);
 
   useEffect(() => {
     const fetchVenue = async () => {
@@ -26,6 +31,9 @@ const VenueDetails = () => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.errors?.[0]?.message || 'Failed to fetch venue');
         setVenue(data.data);
+        
+        // After setting venue, fetch bookings
+        fetchVenueBookings(data.data.id);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -34,6 +42,18 @@ const VenueDetails = () => {
     };
     fetchVenue();
   }, [id]);
+
+  const fetchVenueBookings = async (venueId) => {
+    try {
+      const response = await fetch(`${API_URL}/${venueId}?_bookings=true`);
+      const data = await response.json();
+      if (response.ok && data.data?.bookings) {
+        setVenueBookings(data.data.bookings);
+      }
+    } catch (err) {
+      console.error('Error fetching venue bookings:', err);
+    }
+  };
 
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this venue? This action cannot be undone.')) {
@@ -64,6 +84,24 @@ const VenueDetails = () => {
 
   const handleEdit = () => {
     navigate(`/profile/edit-venue/${id}`);
+  };
+
+  const handleRequireAuth = (bookingData) => {
+    setPendingBooking(bookingData);
+    setShowAuthModal(true);
+  };
+
+  const handleAuthSuccess = async (userData) => {
+    setShowAuthModal(false);
+    if (pendingBooking) {
+      try {
+        const booking = await createBooking(pendingBooking);
+        setPendingBooking(null);
+        navigate(`/booking-confirmation/${booking.id}`);
+      } catch (err) {
+        setError(err.message);
+      }
+    }
   };
 
   if (loading) {
@@ -97,14 +135,22 @@ const VenueDetails = () => {
   const isOwner = user && venue.owner?.name === user.name;
   const cameFromProfile = location.state?.from === 'profile';
 
+  const handleBack = () => {
+    if (cameFromProfile) {
+      navigate('/profile?tab=favorites');
+    } else {
+      navigate('/venues');
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <button
-        onClick={() => navigate(cameFromProfile ? '/profile' : '/venues')}
+        onClick={handleBack}
         className="mb-6 text-gray-600 hover:text-gray-800 transition-colors duration-300 flex items-center gap-2"
       >
         <FaArrowLeft className="h-5 w-5" />
-        {cameFromProfile ? 'Back to Profile' : 'Back to Venues'}
+        {cameFromProfile ? 'Back to Favorites' : 'Back to Venues'}
       </button>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -122,7 +168,7 @@ const VenueDetails = () => {
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex justify-between items-start mb-6">
                 <h2 className="text-2xl font-semibold">{venue.name}</h2>
-                {venue.owner?.name === user?.name && (
+                {isOwner && (
                   <div className="flex gap-2">
                     <button
                       className="bg-white/80 hover:bg-white rounded-full p-2 shadow text-[#0C5560] transition"
@@ -183,11 +229,14 @@ const VenueDetails = () => {
               </div>
             </div>
 
-            {/* Booking Form - Moved here for mobile */}
-            <div className="lg:hidden">
+            {/* Booking Form - Mobile */}
+            <div className="lg:hidden mb-8">
               <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-2xl font-semibold mb-6">Book This Venue</h2>
-                <VenueBooking venue={venue} />
+                <VenueBooking 
+                  venue={venue} 
+                  venueBookings={venueBookings}
+                  onRequireAuth={handleRequireAuth}
+                />
               </div>
             </div>
 
@@ -231,12 +280,21 @@ const VenueDetails = () => {
           {/* Booking Form - Desktop */}
           <div className="hidden lg:block lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8 z-10">
-              <h2 className="text-2xl font-semibold mb-6">Book This Venue</h2>
-              <VenueBooking venue={venue} />
+              <VenueBooking 
+                venue={venue} 
+                venueBookings={venueBookings}
+                onRequireAuth={handleRequireAuth}
+              />
             </div>
           </div>
         </div>
       </div>
+
+      <AuthModal
+        open={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   );
 };

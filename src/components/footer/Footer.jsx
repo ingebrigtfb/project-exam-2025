@@ -1,6 +1,30 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import AuthModal from '../../auth/components/AuthModal';
 import footerBackground from '../../assets/footer-background.png';
 
 export default function Footer() {
+  const { user, login } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+  
+  const isLoggedIn = !!user;
+  
+  const handleProfileClick = (e) => {
+    if (!isLoggedIn) {
+      e.preventDefault();
+      setAuthMode('login');
+      setAuthModalOpen(true);
+    }
+  };
+  
+  const handleAuthSuccess = (userData) => {
+    login(userData);
+    setAuthModalOpen(false);
+    // Redirection is now handled by the AuthModal component
+  };
+
   return (
     <footer className="relative mt-24">
       <div className="relative min-h-[600px] md:min-h-[500px]">
@@ -20,9 +44,29 @@ export default function Footer() {
             <div>
               <h3 className="text-xl font-semibold mb-4 text-white drop-shadow-lg">Quick Links</h3>
               <ul className="space-y-2">
-                <li><a href="/venues" className="text-white/90 hover:text-white transition drop-shadow-md">Browse Venues</a></li>
-                <li><a href="/profile" className="text-white/90 hover:text-white transition drop-shadow-md">My Profile</a></li>
-                <li><a href="/bookings" className="text-white/90 hover:text-white transition drop-shadow-md">My Bookings</a></li>
+                <li>
+                  <Link to="/venues" className="text-white/90 hover:text-white transition drop-shadow-md">
+                    Browse Venues
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to={isLoggedIn ? "/profile" : "#"} 
+                    onClick={handleProfileClick}
+                    className="text-white/90 hover:text-white transition drop-shadow-md"
+                  >
+                    My Profile
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to={isLoggedIn ? "/profile?tab=bookings" : "#"} 
+                    onClick={handleProfileClick}
+                    className="text-white/90 hover:text-white transition drop-shadow-md"
+                  >
+                    My Bookings
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
@@ -39,6 +83,14 @@ export default function Footer() {
           </div>
         </div>
       </div>
+      
+      {/* Auth Modal */}
+      <AuthModal
+        open={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onSuccess={handleAuthSuccess}
+        initialMode={authMode}
+      />
     </footer>
   );
 } 

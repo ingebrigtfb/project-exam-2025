@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useParams, useLocation, redirect } from 'react-router-dom';
 import { FaPlus, FaTrash, FaStar, FaRegStar, FaArrowLeft } from 'react-icons/fa';
 
 const placeholderImg = 'https://placehold.co/800x400?text=Venue+Image';

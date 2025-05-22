@@ -44,10 +44,10 @@ export default function BookingDetails() {
       const response = await fetch(`https://v2.api.noroff.dev/holidaze/venues/${booking.venue.id}?_bookings=true`);
       const data = await response.json();
       if (data.data?.bookings) {
-        setVenueBookings(data.data.bookings.filter(b => b.id !== booking.id)); // Exclude this booking
+        setVenueBookings(data.data.bookings.filter(b => b.id !== booking.id)); 
       }
     } catch (err) {
-      // ignore
+
     }
   };
 
@@ -101,7 +101,7 @@ export default function BookingDetails() {
     setCancelError('');
     try {
       await deleteBooking(booking.id);
-      navigate('/bookings');
+      navigate('/profile?tab=bookings');
     } catch (err) {
       setCancelError(err.message || 'Failed to cancel booking');
     } finally {
@@ -185,11 +185,11 @@ export default function BookingDetails() {
   return (
     <div className="container mx-auto px-4 py-8">
       <button
-        onClick={() => navigate('/bookings')}
+        onClick={() => navigate('/profile?tab=bookings')}
         className="mb-6 text-gray-600 hover:text-gray-800 transition-colors duration-300 flex items-center gap-2"
       >
         <FaArrowLeft className="h-5 w-5" />
-        Back to Bookings
+        Back to My Bookings
       </button>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
