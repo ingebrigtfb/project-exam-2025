@@ -17,7 +17,7 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
   const [showLoginMessage, setShowLoginMessage] = useState(false);
   const navigate = useNavigate();
 
-  // Load saved search parameters on component mount
+
   useEffect(() => {
     const savedParams = localStorage.getItem('lastSearchParams');
     if (savedParams) {
@@ -42,14 +42,12 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
     }
   }, []);
 
-  // Clear search params when component unmounts
   useEffect(() => {
     return () => {
       localStorage.removeItem('lastSearchParams');
     };
   }, []);
 
-  // Hide login message if user is detected
   useEffect(() => {
     if (user && showLoginMessage) {
       setShowLoginMessage(false);
@@ -60,7 +58,7 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
     e.preventDefault();
     if (!user) {
       setShowLoginMessage(true);
-      // Don't immediately trigger auth modal, just show the message
+
       return;
     }
 
@@ -223,20 +221,6 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
             <p className="text-blue-600 text-sm mt-1 mb-3">
               Please log in or register to book this venue. Your booking details will be saved.
             </p>
-            <button
-              type="button"
-              onClick={() => {
-                onRequireAuth?.({
-                  venueId: venue.id,
-                  dateFrom: dateFrom?.toISOString(),
-                  dateTo: dateTo?.toISOString(),
-                  guests
-                });
-              }}
-              className="bg-[#0C5560] text-white px-4 py-2 rounded-lg hover:bg-[#094147] transition-colors text-sm"
-            >
-              Login or Register
-            </button>
           </div>
         </div>
       )}

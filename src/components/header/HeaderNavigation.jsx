@@ -196,7 +196,7 @@ const HeaderNavigation = ({
             : 'pointer-events-none opacity-0 -translate-y-10'
         } bg-white md:hidden`}
       >
-        <div className="flex flex-col items-center pt-20 pb-10 h-full w-full px-6 gap-4">
+        <div className="flex flex-col items-center pt-20 pb-10 h-full w-full px-6 gap-4 overflow-y-auto">
           {/* Profile Avatar & Name at Top */}
           {isLoggedIn && (
             <div className="w-full max-w-xs flex flex-col items-center mb-6">

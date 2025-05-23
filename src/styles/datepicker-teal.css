@@ -19,7 +19,7 @@
   font-family: inherit !important;
 }
 
-/* Only center calendar on mobile screens */
+/* Mobile calendar positioning fixes */
 @media (max-width: 768px) {
   .react-datepicker-centered {
     width: 100%;
@@ -33,6 +33,17 @@
   .react-datepicker-popper {
     left: 50% !important;
     transform: translateX(-50%) !important;
+    position: fixed !important;
+    top: 100px !important;
+    z-index: 9999 !important;
+  }
+
+  /* Ensure the calendar is visible and doesn't get cut off */
+  .react-datepicker__month-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e5e7eb;
   }
 }
 
