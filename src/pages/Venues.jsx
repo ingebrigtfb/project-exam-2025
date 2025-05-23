@@ -7,7 +7,7 @@ import AuthModal from '../auth/components/AuthModal';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { FaSearch } from 'react-icons/fa';
 
-const VENUES_PER_PAGE = 12;
+const VENUES_PER_PAGE = 24;
 
 const Venues = () => {
   const [venues, setVenues] = useState([]);
@@ -62,8 +62,8 @@ const Venues = () => {
     let venuesList = [];
     
     if (searchParams.where) {
-      // Use pagination for search results
-      url = `https://v2.api.noroff.dev/holidaze/venues/search?q=${encodeURIComponent(searchParams.where)}&limit=${VENUES_PER_PAGE}&page=${pageNum}&sort=created&sortOrder=desc`;
+      // For search results, fetch all venues without pagination
+      url = `https://v2.api.noroff.dev/holidaze/venues/search?q=${encodeURIComponent(searchParams.where)}&limit=100&sort=created&sortOrder=desc`;
       const res = await fetch(url);
       const data = await res.json();
       venuesList = data.data || [];
@@ -81,7 +81,6 @@ const Venues = () => {
       const data = await res.json();
       venuesList = data.data || [];
       
-  
       if (searchParams.guests) {
         setTotalVenues(data.meta?.totalCount || 0);
       } else {
@@ -191,14 +190,17 @@ const Venues = () => {
               ))}
             </div>
           </div>
-          <div className="w-full flex justify-center mt-12">
-            <Paginator
-              page={page}
-              totalPages={Math.ceil(totalVenues / VENUES_PER_PAGE)}
-              setPage={setPage}
-              loading={loading}
-            />
-          </div>
+          {/* Only show pagination when not searching */}
+          {!search.where && !search.checkIn && !search.checkOut && search.guests === 1 && (
+            <div className="w-full flex justify-center mt-12">
+              <Paginator
+                page={page}
+                totalPages={Math.ceil(totalVenues / VENUES_PER_PAGE)}
+                setPage={setPage}
+                loading={loading}
+              />
+            </div>
+          )}
         </>
       )}
       <AuthModal 

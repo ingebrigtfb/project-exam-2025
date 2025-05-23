@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaSearch, FaMapMarkerAlt, FaUserFriends, FaRegCalendarAlt, FaUndo, FaMinus, FaPlus } from 'react-icons/fa';
 import northernlights from '../../assets/northernlights.jpeg';
 import DatePicker from 'react-datepicker';
@@ -12,9 +12,22 @@ export default function BookingSearch({ onSearch }) {
   const [checkOut, setCheckOut] = useState(null);
   const [guests, setGuests] = useState('1');
   const [modalOpen, setModalOpen] = useState(false);
+  const [dateError, setDateError] = useState('');
+
+  // Clear date error when dates change
+  useEffect(() => {
+    setDateError('');
+  }, [checkIn, checkOut]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Validate that if one date is filled, both must be filled
+    if ((checkIn && !checkOut) || (!checkIn && checkOut)) {
+      setDateError('Both check-in and check-out dates must be selected');
+      return;
+    }
+    
     let guestsNum = parseInt(guests, 10);
     if (isNaN(guestsNum) || guestsNum < 1) guestsNum = 1;
     
@@ -41,6 +54,7 @@ export default function BookingSearch({ onSearch }) {
     setCheckIn(null);
     setCheckOut(null);
     setGuests('1');
+    setDateError('');
     onSearch?.({
       where: '',
       checkIn: '',
@@ -81,6 +95,8 @@ export default function BookingSearch({ onSearch }) {
         setGuests={setGuests}
         handleSubmit={handleSubmit}
         onSearch={onSearch}
+        dateError={dateError}
+        setDateError={setDateError}
       />
       <form
         onSubmit={handleSubmit}
@@ -127,7 +143,8 @@ export default function BookingSearch({ onSearch }) {
                 dateFormat="dd/MM/yyyy"
                 minDate={new Date()}
                 aria-label="Check in date"
-                required
+                required={!!checkOut}
+                calendarStartDay={1}
               />
             </div>
           </div>
@@ -155,7 +172,8 @@ export default function BookingSearch({ onSearch }) {
                 className="w-full bg-transparent outline-none text-gray-700 placeholder-gray-400 text-base py-1"
                 dateFormat="dd/MM/yyyy"
                 aria-label="Check out date"
-                required
+                required={!!checkIn}
+                calendarStartDay={1}
               />
             </div>
           </div>
@@ -186,7 +204,6 @@ export default function BookingSearch({ onSearch }) {
                 }}
                 className="w-12 text-center bg-transparent outline-none text-base font-semibold"
                 inputMode="numeric"
-                required
               />
               <button
                 type="button"
@@ -217,6 +234,11 @@ export default function BookingSearch({ onSearch }) {
           </button>
         </div>
       </form>
+      {dateError && (
+        <div className="mt-2 text-red-500 text-sm md:text-base">
+          {dateError}
+        </div>
+      )}
     </div>
   );
 } 

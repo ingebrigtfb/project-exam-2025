@@ -1,4 +1,4 @@
-import { FaGlobe } from 'react-icons/fa';
+import { CiMail } from 'react-icons/ci';
 
 export default function ProfileCard({ user }) {
   if (!user) return null;
@@ -28,9 +28,8 @@ export default function ProfileCard({ user }) {
             
             {/* User Info */}
             <div className="flex flex-col mt-3 text-center md:text-left">
-              <div className="flex flex-col md:items-start items-center">
+            <div className="flex flex-col md:items-start items-center">
                 <h1 className="text-xl md:text-2xl font-bold text-gray-900">{name}</h1>
-                <div className="text-sm md:text-base text-gray-500">{name.toLowerCase().replace(/\s+/g, '')}</div>
               </div>
               
               {/* Role Badge */}
@@ -52,7 +51,7 @@ export default function ProfileCard({ user }) {
               {/* Email Info */}
               {email && (
                 <div className="mt-4 flex items-center justify-center md:justify-start text-gray-500 text-sm">
-                  <FaGlobe className="mr-2 h-3 w-3 md:h-4 md:w-4" />
+                  <CiMail className="mr-2 h-3 w-3 md:h-4 md:w-4" />
                   <span>{email}</span>
                 </div>
               )}

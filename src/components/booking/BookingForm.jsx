@@ -149,6 +149,7 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
             placeholderText="Select check-in date"
             dateFormat="dd/MM/yy"
             required
+            calendarStartDay={1}
           />
         </div>
         <div>
@@ -172,6 +173,7 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
             placeholderText="Select check-out date"
             dateFormat="dd/MM/yy"
             required
+            calendarStartDay={1}
           />
         </div>
         <div>
@@ -221,6 +223,20 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
             <p className="text-blue-600 text-sm mt-1 mb-3">
               Please log in or register to book this venue. Your booking details will be saved.
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                onRequireAuth?.({
+                  venueId: venue.id,
+                  dateFrom: dateFrom?.toISOString(),
+                  dateTo: dateTo?.toISOString(),
+                  guests
+                });
+              }}
+              className="bg-[#0C5560] text-white px-4 py-2 rounded-lg hover:bg-[#094147] transition-colors text-sm"
+            >
+              Login or Register
+            </button>
           </div>
         </div>
       )}

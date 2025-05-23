@@ -11,36 +11,88 @@
   z-index: 9999 !important;
 }
 
+/* Center the calendar in mobile modal */
+.react-datepicker {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 320px;
+  font-family: inherit !important;
+}
+
+/* Only center calendar on mobile screens */
+@media (max-width: 768px) {
+  .react-datepicker-centered {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .react-datepicker-popper {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .react-datepicker-centered {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
 .react-datepicker__header {
-  background-color: white;
-  border-bottom: none;
-  padding-top: 2.5rem;
-  padding-bottom: 1rem;
+  background-color: white !important;
+  border-bottom: none !important;
+  padding-top: 1.5rem !important;
+  padding-bottom: 0.5rem !important;
 }
 
 .react-datepicker__current-month {
   font-size: 1.1rem;
   font-weight: 600;
   color: #0C5560;
-  margin-top: -1.2rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.react-datepicker__day-names {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  padding: 0 0.5rem;
 }
 
 .react-datepicker__day-name {
   color: #4B5563;
   font-weight: 500;
-  width: 2.75rem;
-  margin: 0.15rem;
+  width: 2rem !important;
+  margin: 0 !important;
+  text-align: center;
+}
+
+.react-datepicker__month {
+  margin: 0.5rem 0 !important;
+}
+
+.react-datepicker__week {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.25rem 0;
 }
 
 .react-datepicker__day {
-  width: 2.75rem;
-  height: 2.75rem;
-  line-height: 2.75rem;
-  margin: 0.15rem;
-  border-radius: 0.5rem;
+  width: 2rem !important;
+  height: 2rem !important;
+  line-height: 2rem !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
   color: #1F2937;
   font-weight: 500;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 .react-datepicker__day:hover {
@@ -68,7 +120,7 @@
 }
 
 .react-datepicker__navigation {
-  top: 1.5rem;
+  top: 1rem !important;
 }
 
 .react-datepicker__navigation-icon::before {
@@ -86,9 +138,5 @@
 
 .react-datepicker__day--today {
   font-weight: 700;
-  color: #0C5560;
-}
-
-.react-datepicker__month {
-  margin-top: 1.5rem;
+  color: white;
 } 

@@ -8,7 +8,7 @@ export default function ProfileBanner({ banner }) {
   return (
     <div className="w-full h-48 md:h-64 overflow-hidden flex items-center justify-center relative">
       <img src={banner.url} alt="Profile banner" className="object-cover w-full h-full" />
-      <div className="absolute inset-0 bg-black/30"></div>
+      <div className="absolute inset-0 bg-black/50"></div>
     </div>
   );
 } 
