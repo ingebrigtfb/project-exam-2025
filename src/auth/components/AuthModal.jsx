@@ -20,12 +20,12 @@ export default function AuthModal({ open, onClose, onSuccess, initialMode = 'log
   };
   
   const handleAuthSuccess = (userData) => {
-    // Call the parent component's onSuccess if provided
+  
     if (onSuccess) {
       onSuccess(userData);
     }
     
-    // Redirect to profile unless on a venue details page
+  
     const isOnVenueDetailsPage = location.pathname.startsWith('/venues/');
     if (!isOnVenueDetailsPage) {
       navigate('/profile', { replace: true });

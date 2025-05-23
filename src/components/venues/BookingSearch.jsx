@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { FaSearch, FaMapMarkerAlt, FaUserFriends, FaRegCalendarAlt, FaUndo, FaMinus, FaPlus } from 'react-icons/fa';
-import northernlights from '../../assets/northernlights.jpeg';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../styles/datepicker-teal.css';
@@ -13,8 +12,9 @@ export default function BookingSearch({ onSearch }) {
   const [guests, setGuests] = useState('1');
   const [modalOpen, setModalOpen] = useState(false);
   const [dateError, setDateError] = useState('');
+  
+  const northernlightsUrl = "https://github.com/ingebrigtfb/Images-project-exam/blob/main/northernlights.jpeg?raw=true";
 
-  // Clear date error when dates change
   useEffect(() => {
     setDateError('');
   }, [checkIn, checkOut]);
@@ -22,7 +22,6 @@ export default function BookingSearch({ onSearch }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validate that if one date is filled, both must be filled
     if ((checkIn && !checkOut) || (!checkIn && checkOut)) {
       setDateError('Both check-in and check-out dates must be selected');
       return;
@@ -67,9 +66,10 @@ export default function BookingSearch({ onSearch }) {
     <div className="w-full flex flex-col items-center">
       <div
         className="w-full max-w-[1400px] h-60 md:h-72 rounded-[20px] md:rounded-[56px] overflow-hidden flex items-center justify-center relative z-10 shadow-lg"
-        style={{ background: `url(${northernlights}) center/cover no-repeat` }}
+        style={{ background: `url(${northernlightsUrl}) center/cover no-repeat` }}
       >
-        <h1 className="text-3xl md:text-5xl font-bold text-white text-center drop-shadow-lg tracking-wide">
+        <div className="absolute inset-0 bg-black/30"></div>
+        <h1 className="text-3xl md:text-5xl font-bold text-white text-center drop-shadow-lg tracking-wide relative z-10">
           EXPLORE BEAUTIFUL PLACES
         </h1>
       </div>

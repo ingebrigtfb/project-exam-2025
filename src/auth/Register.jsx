@@ -10,6 +10,13 @@ export default function Register({ onSuccess, onSwitch }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate email domain
+    if (!email.endsWith('@stud.noroff.no')) {
+      setError('Email must be a valid stud.noroff.no address');
+      return;
+    }
+    
     setLoading(true);
     setError('');
     try {
@@ -43,14 +50,18 @@ export default function Register({ onSuccess, onSwitch }) {
         required
         className="border px-3 py-2 rounded"
       />
-      <input
-        type="email"
-        placeholder="olanordmann@stud.noroff.no"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        required
-        className="border px-3 py-2 rounded"
-      />
+      <div className="flex flex-col gap-1">
+        <input
+          type="email"
+          placeholder="ola.nordmann@stud.noroff.no"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+          pattern="^[\w\-.]+@stud\.noroff\.no$"
+          title="Email must be a valid stud.noroff.no address"
+          className="border px-3 py-2 rounded"
+        />
+      </div>
       <input
         type="password"
         placeholder="Password"
@@ -73,7 +84,7 @@ export default function Register({ onSuccess, onSwitch }) {
       </button>
       <div className="text-sm">
         Already have an account?{' '}
-        <button type="button" className="underline text-blue-600" onClick={onSwitch}>
+        <button type="button" className="underline" onClick={onSwitch}>
           Login
         </button>
       </div>

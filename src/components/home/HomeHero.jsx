@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import backgroundImage from '../../assets/background+overlay.png';
 import VenueCard from '../cards/VenueCard';
 import AuthModal from '../../auth/components/AuthModal';
 import gsap from 'gsap';
@@ -25,6 +24,8 @@ const HomeHero = () => {
   const [topVenues, setTopVenues] = useState([]);
   const cardRefs = useRef([]);
   const [authOpen, setAuthOpen] = useState(false);
+  
+  const backgroundImageUrl = "https://github.com/ingebrigtfb/Images-project-exam/blob/main/homeBackground.jpeg?raw=true";
 
   const user = JSON.parse(localStorage.getItem('user'));
   const favoritesKey = user ? `favorites_${user.name}` : null;
@@ -98,11 +99,11 @@ const HomeHero = () => {
   return (
     <section className="relative h-[621px] flex items-center justify-center">
       <img 
-        src={backgroundImage} 
+        src={backgroundImageUrl} 
         alt="Hero background" 
         className="absolute inset-0 w-full h-full object-cover"
       />
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-black/40" />
       <div className="relative z-10 text-center text-white">
         <h1
           style={{ textShadow: '0px 4px 4px rgba(0,0,0,0.25)' }}

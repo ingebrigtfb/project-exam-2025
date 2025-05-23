@@ -8,6 +8,13 @@ export default function Login({ onSuccess, onSwitch }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate email domain
+    if (!email.endsWith('@stud.noroff.no')) {
+      setError('Email must be a valid stud.noroff.no address');
+      return;
+    }
+    
     setLoading(true);
     setError('');
     try {
@@ -51,14 +58,18 @@ export default function Login({ onSuccess, onSwitch }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <h2 className="text-xl font-bold">Login</h2>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        required
-        className="border px-3 py-2 rounded"
-      />
+      <div className="flex flex-col gap-1">
+        <input
+          type="email"
+          placeholder="ola.nordmann@stud.noroff.no"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+          pattern="^[\w\-.]+@stud\.noroff\.no$"
+          title="Email must be a valid stud.noroff.no address"
+          className="border px-3 py-2 rounded"
+        />
+      </div>
       <input
         type="password"
         placeholder="Password"
@@ -73,7 +84,7 @@ export default function Login({ onSuccess, onSwitch }) {
       </button>
       <div className="text-sm">
         Don't have an account?{' '}
-        <button type="button" className="underline text-blue-600" onClick={onSwitch}>
+        <button type="button" className="underline" onClick={onSwitch}>
           Register
         </button>
       </div>
