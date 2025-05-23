@@ -237,7 +237,7 @@ export default function AccountSettings({ user, setUser }) {
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <button
               type="submit"
-              className="w-full px-4 py-3 bg-[#0C5560] text-white rounded-lg hover:bg-[#094147] transition duration-200 disabled:opacity-50 flex items-center justify-center"
+              className="w-[150px ] px-4 py-3 bg-[#0C5560] text-white rounded-lg hover:bg-[#094147] transition duration-200 disabled:opacity-50 flex items-center justify-center"
               disabled={isLoading}
             >
               {isLoading ? 'Saving...' : 'Save Changes'}

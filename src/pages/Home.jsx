@@ -1,14 +1,15 @@
 import HomeHero from '../components/home/HomeHero';
-import PopularCat from '../components/home/PopularCat';
-
+import BecomeVenueManager from '../components/home/BecomeVenueManager';
+import CarRentalPartners from '../components/home/CarRentalPartners';
 
 const Home = () => {
   return (
     <div className='min-h-screen'>
       <HomeHero />
-      <div className="block md:hidden" style={{ height: '900px' }} />
+      <div className="block md:hidden" style={{ height: '1100px' }} />
       <div className="hidden md:block" style={{ height: '250px' }} />
-      <PopularCat />
+      <BecomeVenueManager />
+      <CarRentalPartners />
     </div>
   );
 };

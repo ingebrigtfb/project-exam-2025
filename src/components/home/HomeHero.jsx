@@ -10,7 +10,7 @@ gsap.registerPlugin(ScrollTrigger);
 const fetchTopVenues = async () => {
   try {
     const response = await fetch(
-      'https://v2.api.noroff.dev/holidaze/venues?sort=rating&sortOrder=desc&limit=3'
+      'https://v2.api.noroff.dev/holidaze/venues?sort=rating&sortOrder=desc&limit=4'
     );
     const result = await response.json();
     return result.data || [];
@@ -126,7 +126,7 @@ const HomeHero = () => {
       </div>
 
       {/* Desktop layout */} 
-      <div className="hidden md:flex md:absolute md:bottom-0 md:z-20 md:w-full md:max-w-[1000px] md:mx-auto md:px-4 md:justify-center md:gap-6 md:translate-y-48">
+      <div className="hidden md:flex md:absolute md:bottom-0 md:z-20 md:w-full md:max-w-[1400px] md:mx-auto md:px-4 md:justify-center md:gap-6 md:translate-y-48">
         {topVenues.map((venue, idx) => (
           <div
             key={venue.id}
@@ -144,7 +144,7 @@ const HomeHero = () => {
       </div>
 
       {/* Mobile layout */}
-      <div className="md:hidden absolute bottom-0 z-20 w-full px-4 translate-y-200">
+      <div className="md:hidden absolute bottom-0 z-20 w-full px-4 translate-y-265">
         <div className="flex flex-col items-center gap-6">
           {topVenues.map((venue, idx) => (
             <div

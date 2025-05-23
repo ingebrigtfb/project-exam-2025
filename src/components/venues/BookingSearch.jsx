@@ -65,7 +65,7 @@ export default function BookingSearch({ onSearch }) {
   return (
     <div className="w-full flex flex-col items-center">
       <div
-        className="w-full max-w-[1400px] h-60 md:h-72 rounded-[20px] md:rounded-[56px] overflow-hidden flex items-center justify-center relative z-10 shadow-lg"
+        className="w-full max-w-[1400px] h-60 md:h-72 rounded-[20px] md:rounded-[25px] overflow-hidden flex items-center justify-center relative z-10 shadow-lg"
         style={{ background: `url(${northernlightsUrl}) center/cover no-repeat` }}
       >
         <div className="absolute inset-0 bg-black/30"></div>
