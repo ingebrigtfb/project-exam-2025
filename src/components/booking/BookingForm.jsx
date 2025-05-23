@@ -99,13 +99,39 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
     }
   };
 
-  const isDateBooked = (date) => {
+  const isDateBooked = (date, isCheckIn = false) => {
     if (!venueBookings || !Array.isArray(venueBookings) || venueBookings.length === 0) return false;
     
     // Convert the date to midnight for comparison
     const checkDate = new Date(date);
     checkDate.setHours(0, 0, 0, 0);
     
+    // For check-out date selection, we need additional logic
+    if (!isCheckIn && dateFrom && dateFrom < checkDate) {
+      // We're selecting a check-out date after a check-in date is already selected
+      // Need to verify there are no bookings between the check-in date and this potential check-out date
+      for (const booking of venueBookings) {
+        const bookingStart = new Date(booking.dateFrom);
+        bookingStart.setHours(0, 0, 0, 0);
+        
+        const bookingEnd = new Date(booking.dateTo);
+        bookingEnd.setHours(0, 0, 0, 0);
+        
+        // If the booking starts between our selected check-in and this potential check-out
+        // OR if the booking ends between our selected check-in and this potential check-out
+        // OR if the booking completely spans our selected period
+        if (
+          (bookingStart >= dateFrom && bookingStart < checkDate) || 
+          (bookingEnd > dateFrom && bookingEnd <= checkDate) ||
+          (bookingStart <= dateFrom && bookingEnd >= checkDate)
+        ) {
+          return true; // Date is not available
+        }
+      }
+      return false; // No conflict found, date is available
+    }
+    
+    // For check-in date selection or when no check-in date is selected yet
     return venueBookings.some(booking => {
       // Convert booking dates to local midnight
       const bookingStart = new Date(booking.dateFrom);
@@ -129,9 +155,29 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
             onChange={date => {
               if (date) {
                 date.setHours(12, 0, 0, 0);
+                
+                // Check if there are any bookings between the new check-in date and the current check-out date
+                const shouldResetCheckout = dateTo && venueBookings && Array.isArray(venueBookings) && 
+                  venueBookings.some(booking => {
+                    const bookingStart = new Date(booking.dateFrom);
+                    bookingStart.setHours(0, 0, 0, 0);
+                    
+                    const bookingEnd = new Date(booking.dateTo);
+                    bookingEnd.setHours(0, 0, 0, 0);
+                    
+                    // Check if any part of this booking is between new check-in and current check-out
+                    return (
+                      (bookingStart >= date && bookingStart < dateTo) || 
+                      (bookingEnd > date && bookingEnd <= dateTo) ||
+                      (bookingStart <= date && bookingEnd >= dateTo)
+                    );
+                  });
+                
                 setDateFrom(date);
+                
                 // Reset check-out date if it's before or equal to the new check-in date
-                if (dateTo && date >= dateTo) {
+                // OR if there are bookings between the new check-in and current check-out
+                if (dateTo && (date >= dateTo || shouldResetCheckout)) {
                   setDateTo(null);
                 }
               } else {
@@ -142,7 +188,7 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
             startDate={dateFrom}
             endDate={dateTo}
             minDate={new Date()}
-            filterDate={date => !isDateBooked(date)}
+            filterDate={date => !isDateBooked(date, true)}
             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0C5560] focus:border-transparent"
             placeholderText="Select check-in date"
             dateFormat="dd/MM/yy"
@@ -166,7 +212,7 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
             startDate={dateFrom}
             endDate={dateTo}
             minDate={dateFrom || new Date()}
-            filterDate={date => !isDateBooked(date)}
+            filterDate={date => !isDateBooked(date, false)}
             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0C5560] focus:border-transparent"
             placeholderText="Select check-out date"
             dateFormat="dd/MM/yy"
