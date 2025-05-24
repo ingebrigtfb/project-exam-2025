@@ -20,7 +20,7 @@ export default function Register({ onSuccess, onSwitch }) {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('https://v2.api.noroff.dev/auth/register', {
+      const registerRes = await fetch('https://v2.api.noroff.dev/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,10 +28,36 @@ export default function Register({ onSuccess, onSwitch }) {
         },
         body: JSON.stringify({ name, email, password, venueManager }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.errors?.[0]?.message || 'Registration failed');
-      localStorage.setItem('user', JSON.stringify(data.data));
-      if (onSuccess) onSuccess(data.data);
+      const registerData = await registerRes.json();
+      if (!registerRes.ok) throw new Error(registerData.errors?.[0]?.message || 'Registration failed');
+      
+      const loginRes = await fetch('https://v2.api.noroff.dev/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': import.meta.env.VITE_NOROFF_API_KEY,
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      const loginData = await loginRes.json();
+      if (!loginRes.ok) throw new Error(loginData.errors?.[0]?.message || 'Auto-login after registration failed');
+      
+      const profileRes = await fetch('https://v2.api.noroff.dev/holidaze/profiles/' + loginData.data.name, {
+        headers: {
+          'Authorization': `Bearer ${loginData.data.accessToken}`,
+          'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY
+        }
+      });
+      const profileData = await profileRes.json();
+      if (!profileRes.ok) throw new Error(profileData.errors?.[0]?.message || 'Failed to fetch profile');
+
+      const userData = {
+        ...loginData.data,
+        venueManager: profileData.data.venueManager
+      };
+
+      localStorage.setItem('user', JSON.stringify(userData));
+      if (onSuccess) onSuccess(userData);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -61,6 +87,7 @@ export default function Register({ onSuccess, onSwitch }) {
           title="Email must be a valid stud.noroff.no address"
           className="border px-3 py-2 rounded"
         />
+        <small className="text-gray-500">Email must end with @stud.noroff.no</small>
       </div>
       <input
         type="password"
