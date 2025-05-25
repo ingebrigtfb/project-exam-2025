@@ -1,6 +1,6 @@
 import BookingForm from '../booking/BookingForm';
 
-export default function VenueBooking({ venue, venueBookings, onRequireAuth }) {
+export default function VenueBooking({ venue, venueBookings, onRequireAuth, isOwner }) {
   if (!venue) return null;
   return (
     <div className="w-full">
@@ -14,6 +14,7 @@ export default function VenueBooking({ venue, venueBookings, onRequireAuth }) {
         venue={venue} 
         venueBookings={venueBookings} 
         onRequireAuth={onRequireAuth} 
+        isOwner={isOwner}
       />
     </div>
   );

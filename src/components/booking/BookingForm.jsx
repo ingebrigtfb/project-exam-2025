@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { createBooking } from '../../api/fetchBookings';
 import { useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
-import { FaCalendarAlt, FaUserFriends, FaMinus, FaPlus, FaLock } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserFriends, FaMinus, FaPlus, FaLock, FaInfoCircle } from 'react-icons/fa';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../styles/datepicker-teal.css';
 import { useAuth } from '../../contexts/AuthContext';
 
-export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
+export default function BookingForm({ venue, venueBookings, onRequireAuth, isOwner }) {
   const { user } = useAuth();
   const [dateFrom, setDateFrom] = useState(null);
   const [dateTo, setDateTo] = useState(null);
@@ -17,6 +17,18 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
   const [showLoginMessage, setShowLoginMessage] = useState(false);
   const navigate = useNavigate();
 
+  // Calculate the total price based on number of nights and price per night
+  const calculateTotalPrice = () => {
+    if (!dateFrom || !dateTo || !venue) return null;
+    
+    const oneDay = 24 * 60 * 60 * 1000; 
+    const diffDays = Math.round(Math.abs((dateTo - dateFrom) / oneDay));
+    
+    // Calculate total price
+    return diffDays * venue.price;
+  };
+
+  const totalPrice = calculateTotalPrice();
 
   useEffect(() => {
     const savedParams = localStorage.getItem('lastSearchParams');
@@ -58,11 +70,11 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
     e.preventDefault();
     if (!user) {
       setShowLoginMessage(true);
-
       return;
     }
 
     setError('');
+    
     if (!dateFrom || !dateTo) {
       setError('Please select both check-in and check-out dates');
       return;
@@ -101,15 +113,12 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
 
   const isDateBooked = (date, isCheckIn = false) => {
     if (!venueBookings || !Array.isArray(venueBookings) || venueBookings.length === 0) return false;
-    
-    // Convert the date to midnight for comparison
+
     const checkDate = new Date(date);
     checkDate.setHours(0, 0, 0, 0);
     
-    // For check-out date selection, we need additional logic
     if (!isCheckIn && dateFrom && dateFrom < checkDate) {
-      // We're selecting a check-out date after a check-in date is already selected
-      // Need to verify there are no bookings between the check-in date and this potential check-out date
+
       for (const booking of venueBookings) {
         const bookingStart = new Date(booking.dateFrom);
         bookingStart.setHours(0, 0, 0, 0);
@@ -117,21 +126,18 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
         const bookingEnd = new Date(booking.dateTo);
         bookingEnd.setHours(0, 0, 0, 0);
         
-        // If the booking starts between our selected check-in and this potential check-out
-        // OR if the booking ends between our selected check-in and this potential check-out
-        // OR if the booking completely spans our selected period
+  
         if (
           (bookingStart >= dateFrom && bookingStart < checkDate) || 
           (bookingEnd > dateFrom && bookingEnd <= checkDate) ||
           (bookingStart <= dateFrom && bookingEnd >= checkDate)
         ) {
-          return true; // Date is not available
+          return true; 
         }
       }
-      return false; // No conflict found, date is available
+      return false;
     }
-    
-    // For check-in date selection or when no check-in date is selected yet
+  
     return venueBookings.some(booking => {
       // Convert booking dates to local midnight
       const bookingStart = new Date(booking.dateFrom);
@@ -147,6 +153,18 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {isOwner && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4 flex items-start">
+          <FaInfoCircle className="text-amber-500 mt-1 mr-3 flex-shrink-0" />
+          <div className="w-full">
+            <p className="text-amber-700 font-medium">You own this venue</p>
+            <p className="text-amber-600 text-sm mt-1">
+              As the owner of this venue, you cannot make a booking for your own property.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
@@ -175,8 +193,7 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
                 
                 setDateFrom(date);
                 
-                // Reset check-out date if it's before or equal to the new check-in date
-                // OR if there are bookings between the new check-in and current check-out
+        
                 if (dateTo && (date >= dateTo || shouldResetCheckout)) {
                   setDateTo(null);
                 }
@@ -259,6 +276,24 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
         </div>
       </div>
 
+      {/* Display total price if dates are selected */}
+      {totalPrice !== null && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-gray-600">Price per night:</span>
+            <span className="font-semibold">${venue.price}</span>
+          </div>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-gray-600">Number of nights:</span>
+            <span className="font-semibold">{Math.round(Math.abs((dateTo - dateFrom) / (24 * 60 * 60 * 1000)))}</span>
+          </div>
+          <div className="flex justify-between items-center pt-2 border-t border-gray-200 mt-2">
+            <span className="text-gray-700 font-medium">Total price:</span>
+            <span className="text-lg font-bold text-[#0C5560]">${totalPrice}</span>
+          </div>
+        </div>
+      )}
+
       {showLoginMessage && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 flex items-start">
           <FaLock className="text-blue-500 mt-1 mr-3 flex-shrink-0" />
@@ -277,7 +312,7 @@ export default function BookingForm({ venue, venueBookings, onRequireAuth }) {
 
       <button
         type="submit"
-        disabled={isLoading}
+        disabled={isLoading || isOwner}
         className="w-full bg-[#0C5560] text-white py-2 px-4 rounded-md hover:bg-[#094147] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? 'Processing...' : 'Book Now'}

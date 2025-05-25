@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import VenueCard from '../cards/VenueCard';
 import AuthModal from '../../auth/components/AuthModal';
+import LoadingSpinner from '../common/LoadingSpinner';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
+import backgroundImage from '../../assets/homeBackground.webp';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -22,11 +24,10 @@ const fetchTopVenues = async () => {
 const HomeHero = () => {
   const navigate = useNavigate();
   const [topVenues, setTopVenues] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const cardRefs = useRef([]);
   const [authOpen, setAuthOpen] = useState(false);
   
-  const backgroundImageUrl = "https://github.com/ingebrigtfb/Images-project-exam/blob/main/homeBackground.jpeg?raw=true";
-
   const user = JSON.parse(localStorage.getItem('user'));
   const favoritesKey = user ? `favorites_${user.name}` : null;
   const [favorites, setFavorites] = useState(() => {
@@ -55,10 +56,19 @@ const HomeHero = () => {
   };
 
   useEffect(() => {
-    fetchTopVenues().then(setTopVenues);
+    const loadVenues = async () => {
+      setIsLoading(true);
+      const venues = await fetchTopVenues();
+      setTopVenues(venues);
+      setIsLoading(false);
+    };
+    
+    loadVenues();
   }, []);
 
   useEffect(() => {
+    if (isLoading) return;
+    
     ScrollTrigger.refresh();
     cardRefs.current.forEach((card) => {
       if (card) {
@@ -82,7 +92,7 @@ const HomeHero = () => {
     });
 
     return () => ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-  }, [topVenues]);
+  }, [topVenues, isLoading]);
 
   cardRefs.current = [];
 
@@ -96,10 +106,62 @@ const HomeHero = () => {
     }
   }, [favoritesKey]);
 
+  // Render venue cards or loading spinner
+  const renderVenueCards = () => {
+    if (isLoading) {
+      return (
+        <div className="flex justify-center items-center w-full h-40">
+          <LoadingSpinner />
+        </div>
+      );
+    }
+    
+    return topVenues.map((venue, idx) => (
+      <div
+        key={venue.id}
+        ref={(el) => (cardRefs.current[idx] = el)}
+        className="max-w-[298px] w-full flex justify-center transition-all duration-300"
+      >
+        <VenueCard
+          venue={venue}
+          isFavorite={favorites.includes(venue.id)}
+          onToggleFavorite={handleToggleFavorite}
+          onRequireAuth={() => setAuthOpen(true)}
+        />
+      </div>
+    ));
+  };
+  
+  // Render mobile venue cards or loading spinner
+  const renderMobileVenueCards = () => {
+    if (isLoading) {
+      return (
+        <div className="flex justify-center items-center w-full h-40">
+          <LoadingSpinner />
+        </div>
+      );
+    }
+    
+    return topVenues.map((venue, idx) => (
+      <div
+        key={venue.id}
+        ref={(el) => (cardRefs.current[idx] = el)}
+        className="w-full flex justify-center"
+      >
+        <VenueCard
+          venue={venue}
+          isFavorite={favorites.includes(venue.id)}
+          onToggleFavorite={handleToggleFavorite}
+          onRequireAuth={() => setAuthOpen(true)}
+        />
+      </div>
+    ));
+  };
+
   return (
     <section className="relative h-[621px] flex items-center justify-center">
       <img 
-        src={backgroundImageUrl} 
+        src={backgroundImage} 
         alt="Hero background" 
         className="absolute inset-0 w-full h-full object-cover"
       />
@@ -127,39 +189,13 @@ const HomeHero = () => {
 
       {/* Desktop layout */} 
       <div className="hidden md:flex md:absolute md:bottom-0 md:z-20 md:w-full md:max-w-[1400px] md:mx-auto md:px-4 md:justify-center md:gap-6 md:translate-y-48">
-        {topVenues.map((venue, idx) => (
-          <div
-            key={venue.id}
-            ref={(el) => (cardRefs.current[idx] = el)}
-            className="max-w-[298px] w-full flex justify-center transition-all duration-300"
-          >
-            <VenueCard
-              venue={venue}
-              isFavorite={favorites.includes(venue.id)}
-              onToggleFavorite={handleToggleFavorite}
-              onRequireAuth={() => setAuthOpen(true)}
-            />
-          </div>
-        ))}
+        {renderVenueCards()}
       </div>
 
       {/* Mobile layout */}
       <div className="md:hidden absolute bottom-0 z-20 w-full px-4 translate-y-265">
         <div className="flex flex-col items-center gap-6">
-          {topVenues.map((venue, idx) => (
-            <div
-              key={venue.id}
-              ref={(el) => (cardRefs.current[idx] = el)}
-              className="w-full flex justify-center"
-            >
-              <VenueCard
-                venue={venue}
-                isFavorite={favorites.includes(venue.id)}
-                onToggleFavorite={handleToggleFavorite}
-                onRequireAuth={() => setAuthOpen(true)}
-              />
-            </div>
-          ))}
+          {renderMobileVenueCards()}
         </div>
       </div>
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />

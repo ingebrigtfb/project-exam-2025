@@ -4,6 +4,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../styles/datepicker-teal.css';
 import MobileSearchModal from './MobileSearchModal';
+import northernlights from '../../assets/northernlights.webp';
 
 export default function BookingSearch({ onSearch }) {
   const [where, setWhere] = useState('');
@@ -13,8 +14,7 @@ export default function BookingSearch({ onSearch }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [dateError, setDateError] = useState('');
   
-  const northernlightsUrl = "https://github.com/ingebrigtfb/Images-project-exam/blob/main/northernlights.jpeg?raw=true";
-
+  
   useEffect(() => {
     setDateError('');
   }, [checkIn, checkOut]);
@@ -66,7 +66,7 @@ export default function BookingSearch({ onSearch }) {
     <div className="w-full flex flex-col items-center">
       <div
         className="w-full max-w-[1400px] h-60 md:h-72 rounded-[20px] md:rounded-[25px] overflow-hidden flex items-center justify-center relative z-10 shadow-lg"
-        style={{ background: `url(${northernlightsUrl}) center/cover no-repeat` }}
+        style={{ background: `url(${northernlights}) center/cover no-repeat` }}
       >
         <div className="absolute inset-0 bg-black/30"></div>
         <h1 className="text-3xl md:text-5xl font-bold text-white text-center drop-shadow-lg tracking-wide relative z-10">

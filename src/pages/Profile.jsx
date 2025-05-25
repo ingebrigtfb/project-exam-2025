@@ -28,6 +28,11 @@ export default function Profile() {
     }
   });
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   // Update active tab when URL changes
   useEffect(() => {
     const tabFromUrl = searchParams.get('tab');
@@ -71,6 +76,8 @@ export default function Profile() {
     setActiveTab(tab);
     localStorage.setItem('profileActiveTab', tab);
     setSearchParams({ tab });
+    // Scroll to top when changing tabs
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (

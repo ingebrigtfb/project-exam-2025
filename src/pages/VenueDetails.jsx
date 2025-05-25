@@ -23,6 +23,10 @@ const VenueDetails = () => {
   const [pendingBooking, setPendingBooking] = useState(null);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [id]);
+
+  useEffect(() => {
     const fetchVenue = async () => {
       setLoading(true);
       setError(null);
@@ -236,6 +240,7 @@ const VenueDetails = () => {
                   venue={venue} 
                   venueBookings={venueBookings}
                   onRequireAuth={handleRequireAuth}
+                  isOwner={isOwner}
                 />
               </div>
             </div>
@@ -284,6 +289,7 @@ const VenueDetails = () => {
                 venue={venue} 
                 venueBookings={venueBookings}
                 onRequireAuth={handleRequireAuth}
+                isOwner={isOwner}
               />
             </div>
           </div>
