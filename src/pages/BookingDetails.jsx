@@ -7,6 +7,7 @@ import DatePicker from 'react-datepicker';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../styles/datepicker-teal.css';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function BookingDetails() {
   const { id } = useParams();
@@ -23,6 +24,12 @@ export default function BookingDetails() {
   const [editDateTo, setEditDateTo] = useState(null);
   const [editGuests, setEditGuests] = useState(1);
   const [venueBookings, setVenueBookings] = useState([]);
+  
+  usePageTitle('Booking Details');
+  
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [id]);
 
   useEffect(() => {
     const fetchBooking = async () => {
@@ -117,11 +124,41 @@ export default function BookingDetails() {
     fetchVenueBookings();
   };
 
-  const isDateBooked = (date) => {
+  const isDateBooked = (date, isCheckIn = false) => {
+    if (!venueBookings || !Array.isArray(venueBookings) || venueBookings.length === 0) return false;
+
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+    
+    if (!isCheckIn && editDateFrom && editDateFrom < checkDate) {
+      for (const b of venueBookings) {
+        const bookingStart = new Date(b.dateFrom);
+        bookingStart.setHours(0, 0, 0, 0);
+        
+        const bookingEnd = new Date(b.dateTo);
+        bookingEnd.setHours(0, 0, 0, 0);
+        
+        if (
+          (bookingStart >= editDateFrom && bookingStart < checkDate) || 
+          (bookingEnd > editDateFrom && bookingEnd <= checkDate) ||
+          (bookingStart <= editDateFrom && bookingEnd >= checkDate)
+        ) {
+          return true; 
+        }
+      }
+      return false;
+    }
+  
     return venueBookings.some(b => {
-      const start = new Date(b.dateFrom);
-      const end = new Date(b.dateTo);
-      return date >= start && date <= end;
+      // Convert booking dates to local midnight
+      const bookingStart = new Date(b.dateFrom);
+      bookingStart.setHours(0, 0, 0, 0);
+      
+      const bookingEnd = new Date(b.dateTo);
+      bookingEnd.setHours(0, 0, 0, 0);
+      
+      // Check if the date falls within any booking period
+      return checkDate >= bookingStart && checkDate <= bookingEnd;
     });
   };
 
@@ -133,17 +170,18 @@ export default function BookingDetails() {
       // Validate dates
       if (!editDateFrom || !editDateTo) throw new Error('Please select both check-in and check-out dates');
       if (editDateFrom >= editDateTo) throw new Error('Check-out date must be after check-in date');
-      // Check for overlap
-      const isOverlap = venueBookings.some(b => {
-        const start = new Date(b.dateFrom);
-        const end = new Date(b.dateTo);
-        return (editDateFrom <= end) && (start <= editDateTo);
-      });
-      if (isOverlap) throw new Error('Selected dates overlap with an existing booking. Please choose another period.');
+      
+      // Check if the dates are in the past
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (editDateFrom < today) throw new Error('Check-in date cannot be in the past');
+      
       if (editGuests < 1) throw new Error('Number of guests must be at least 1');
       if (editGuests > booking.venue.maxGuests) throw new Error(`Maximum ${booking.venue.maxGuests} guests allowed`);
+      
       const user = JSON.parse(localStorage.getItem('user'));
       if (!user?.accessToken) throw new Error('No authentication token found');
+      
       const response = await fetch(`https://v2.api.noroff.dev/holidaze/bookings/${booking.id}`, {
         method: 'PUT',
         headers: {
@@ -157,16 +195,18 @@ export default function BookingDetails() {
           guests: editGuests
         })
       });
+      
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(errorData?.message || `Failed to update booking: ${response.status}`);
       }
+      
       const updated = await response.json();
+      
       // Fetch the venue data for the updated booking
       const venueResponse = await fetch(`https://v2.api.noroff.dev/holidaze/venues/${booking.venue.id}`);
       const venueData = await venueResponse.json();
       
-      // Combine the booking and venue data
       const updatedWithVenue = {
         ...updated.data,
         venue: venueData.data
@@ -174,7 +214,8 @@ export default function BookingDetails() {
       
       setBooking(updatedWithVenue);
       setEditOpen(false);
-      navigate('/booking-confirmation', { state: { booking: updatedWithVenue, isEdit: true } });
+      
+      navigate(`/booking-confirmation/${updatedWithVenue.id}?edit=true`);
     } catch (err) {
       setEditError(err.message || 'Failed to update booking');
     } finally {
@@ -358,18 +399,44 @@ export default function BookingDetails() {
                   <DatePicker
                     selected={editDateFrom}
                     onChange={date => {
-                      setEditDateFrom(date);
-                      if (editDateTo && date && date >= editDateTo) setEditDateTo(null);
+                      if (date) {
+                        date.setHours(12, 0, 0, 0);
+                        
+                        // Check if there are any bookings between the new check-in date and the current check-out date
+                        const shouldResetCheckout = editDateTo && venueBookings && Array.isArray(venueBookings) && 
+                          venueBookings.some(b => {
+                            const bookingStart = new Date(b.dateFrom);
+                            bookingStart.setHours(0, 0, 0, 0);
+                            
+                            const bookingEnd = new Date(b.dateTo);
+                            bookingEnd.setHours(0, 0, 0, 0);
+                            
+                            // Check if any part of this booking is between new check-in and current check-out
+                            return (
+                              (bookingStart >= date && bookingStart < editDateTo) || 
+                              (bookingEnd > date && bookingEnd <= editDateTo) ||
+                              (bookingStart <= date && bookingEnd >= editDateTo)
+                            );
+                          });
+                        
+                        setEditDateFrom(date);
+                        
+                        if (editDateTo && (date >= editDateTo || shouldResetCheckout)) {
+                          setEditDateTo(null);
+                        }
+                      } else {
+                        setEditDateFrom(null);
+                      }
                     }}
                     selectsStart
                     startDate={editDateFrom}
                     endDate={editDateTo}
                     minDate={new Date()}
+                    filterDate={date => !isDateBooked(date, true)}
                     placeholderText="Select check-in date"
                     className="w-full bg-gray-100 rounded-lg px-3 py-2 outline-none text-gray-700 placeholder-gray-400 text-base"
                     dateFormat="dd/MM/yyyy"
                     required
-                    filterDate={date => !isDateBooked(date)}
                     calendarStartDay={1}
                   />
                 </div>
@@ -380,16 +447,23 @@ export default function BookingDetails() {
                   <FaCalendarAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <DatePicker
                     selected={editDateTo}
-                    onChange={date => setEditDateTo(date)}
+                    onChange={date => {
+                      if (date) {
+                        date.setHours(12, 0, 0, 0);
+                        setEditDateTo(date);
+                      } else {
+                        setEditDateTo(null);
+                      }
+                    }}
                     selectsEnd
                     startDate={editDateFrom}
                     endDate={editDateTo}
                     minDate={editDateFrom || new Date()}
+                    filterDate={date => !isDateBooked(date, false)}
                     placeholderText="Select check-out date"
                     className="w-full bg-gray-100 rounded-lg px-3 py-2 outline-none text-gray-700 placeholder-gray-400 text-base"
                     dateFormat="dd/MM/yyyy"
                     required
-                    filterDate={date => !isDateBooked(date)}
                     calendarStartDay={1}
                   />
                 </div>

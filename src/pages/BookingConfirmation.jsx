@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { FaArrowLeft, FaCalendarAlt, FaUsers, FaMapMarkerAlt, FaWifi, FaParking, FaUtensils, FaPaw } from 'react-icons/fa';
 import ImageCarousel from '../components/imageCarousel/ImageCarousel';
 import { useState, useEffect, useRef } from 'react';
@@ -11,14 +11,20 @@ import AuthModal from '../auth/components/AuthModal';
 export default function BookingConfirmation() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, login } = useAuth();
   const [booking, setBooking] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const confirmationRef = useRef(null);
+  const [isEdit, setIsEdit] = useState(false);
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const editParam = searchParams.get('edit');
+    setIsEdit(editParam === 'true' || (location.state && location.state.isEdit));
+    
     const fetchBooking = async () => {
       try {
         const data = await getBooking(id);
@@ -31,7 +37,7 @@ export default function BookingConfirmation() {
     };
 
     fetchBooking();
-  }, [id]);
+  }, [id, location]);
   
   useEffect(() => {
     if (!isLoading && booking) {
@@ -94,10 +100,14 @@ export default function BookingConfirmation() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Success Message */}
           <div ref={confirmationRef} className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
-            <h1 className="text-2xl font-semibold text-green-800 mb-2">Booking Confirmed!</h1>
+            <h1 className="text-2xl font-semibold text-green-800 mb-2">
+              {isEdit ? 'Booking Updated!' : 'Booking Confirmed!'}
+            </h1>
             <p className="text-green-700 mb-4">
-              Your booking has been successfully created. 
-              You can view all your bookings in the bookings section.
+              {isEdit 
+                ? 'Your booking has been successfully updated.'
+                : 'Your booking has been successfully created.'
+              } You can view all your bookings in the bookings section.
             </p>
             <button
               onClick={handleGoToBookings}
