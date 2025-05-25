@@ -9,8 +9,11 @@ import FavoritesList from '../components/profile/FavoritesList';
 import VenueManagerGuestMessage from '../components/profile/VenueManagerGuestMessage';
 import ManagerDashboard from '../components/VenueManager/ManagerDashboard';
 import BookingsList from '../components/profile/BookingsList';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function Profile() {
+  usePageTitle('Profile');
+  
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();

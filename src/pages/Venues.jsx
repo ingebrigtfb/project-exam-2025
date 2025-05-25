@@ -6,10 +6,13 @@ import BookingSearch from '../components/venues/BookingSearch';
 import AuthModal from '../auth/components/AuthModal';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { FaSearch } from 'react-icons/fa';
+import usePageTitle from '../hooks/usePageTitle';
 
 const VENUES_PER_PAGE = 24;
 
 const Venues = () => {
+  usePageTitle('Venues');
+  
   const [venues, setVenues] = useState([]);
   const [page, setPage] = useState(1);
   const [totalVenues, setTotalVenues] = useState(0);
@@ -53,7 +56,6 @@ const Venues = () => {
     setFavorites(JSON.parse(localStorage.getItem(newFavoritesKey)) || []);
     setAuthOpen(false);
     
-    // Note: Redirection is handled by the AuthModal component
   };
 
   const loadVenues = async (pageNum = page, searchParams = search) => {
@@ -62,14 +64,13 @@ const Venues = () => {
     let venuesList = [];
     
     if (searchParams.where) {
-      // For search results, fetch all venues without pagination
+
       url = `https://v2.api.noroff.dev/holidaze/venues/search?q=${encodeURIComponent(searchParams.where)}&limit=100&sort=created&sortOrder=desc`;
       const res = await fetch(url);
       const data = await res.json();
       venuesList = data.data || [];
       setTotalVenues(data.meta?.totalCount || 0);
 
-      // Apply guest filter to search results
       if (searchParams.guests) {
         venuesList = venuesList.filter(venue => venue.maxGuests >= searchParams.guests);
         setTotalVenues(venuesList.length);
@@ -88,7 +89,6 @@ const Venues = () => {
       }
     }
 
-    // Date-availability filtering
     if (searchParams.checkIn && searchParams.checkOut) {
       const checkIn = new Date(searchParams.checkIn);
       const checkOut = new Date(searchParams.checkOut);
@@ -98,11 +98,9 @@ const Venues = () => {
         return (aStart <= bEnd) && (bStart <= aEnd);
       };
 
-      // Fetch bookings for each venue in parallel
       const venuesWithBookings = await Promise.all(
         venuesList.map(async (venue) => {
           try {
-            // Use the public venue endpoint with _bookings=true
             const res = await fetch(`https://v2.api.noroff.dev/holidaze/venues/${venue.id}?_bookings=true`);
             if (!res.ok) {
               return { ...venue, bookings: [] };
@@ -152,7 +150,6 @@ const Venues = () => {
 
   const totalPages = Math.ceil(totalVenues / VENUES_PER_PAGE);
 
-  // Always reset page to 1 on new search
   const handleSearch = (values) => {
     setPage(1);
     setSearch(values);
