@@ -139,7 +139,7 @@ export default function EditVenue() {
         throw new Error(data.errors?.[0]?.message || 'Failed to update venue');
       }
       setSuccess(true);
-      setTimeout(() => navigate(`/venues/${id}`), 1200);
+      setTimeout(() => navigate(`/profile`), 1200);
     } catch (err) {
       setError(err.message);
     } finally {

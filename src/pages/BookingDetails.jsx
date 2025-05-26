@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBooking, deleteBooking } from '../api/fetchBookings';
-import { FaArrowLeft, FaCalendarAlt, FaUsers, FaMapMarkerAlt, FaWifi, FaParking, FaUtensils, FaPaw, FaEdit, FaTimes, FaUserFriends, FaMinus, FaPlus, FaUser } from 'react-icons/fa';
+import { FaArrowLeft, FaCalendarAlt, FaUsers, FaMapMarkerAlt, FaWifi, FaParking, FaUtensils, FaPaw, FaEdit, FaTimes, FaUserFriends, FaMinus, FaPlus, FaUser, FaTrash } from 'react-icons/fa';
 import ImageCarousel from '../components/imageCarousel/ImageCarousel';
 import DatePicker from 'react-datepicker';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -247,7 +247,31 @@ export default function BookingDetails() {
           {/* Booking Information */}
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-2xl font-semibold mb-6">Booking Information</h2>
+              <div className="flex justify-between items-start mb-6">
+                <h2 className="text-2xl font-semibold">Booking Information</h2>
+                {isUpcoming && isOwnBooking && (
+                  <div className="flex gap-2">
+                    <button
+                      className="bg-white/80 hover:bg-white rounded-full p-2 shadow text-[#0C5560] transition"
+                      onClick={handleEditOpen}
+                      title="Edit booking"
+                    >
+                      <FaEdit size={20} />
+                    </button>
+                    <button
+                      className="bg-white/80 hover:bg-white rounded-full p-2 shadow text-red-500 transition disabled:opacity-50"
+                      onClick={handleCancelBooking}
+                      disabled={cancelLoading}
+                      title={cancelLoading ? "Cancelling..." : "Cancel booking"}
+                    >
+                      {cancelLoading ? <LoadingSpinner /> : <FaTrash size={20} />}
+                    </button>
+                  </div>
+                )}
+              </div>
+              {cancelError && (
+                <div className="text-red-500 text-sm mb-4">{cancelError}</div>
+              )}
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <FaCalendarAlt className="text-gray-600" />
@@ -281,38 +305,10 @@ export default function BookingDetails() {
                   </div>
                 </div>
               </div>
-              {isUpcoming && isOwnBooking && (
-                <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={handleEditOpen}
-                    className="bg-[#0C5560] text-white rounded px-4 py-2 text-base hover:bg-[#094147] transition flex items-center gap-2"
-                  >
-                    <FaEdit /> Edit Booking
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancelBooking}
-                    className="bg-red-500 text-white rounded px-4 py-2 text-base hover:bg-red-600 transition disabled:opacity-50"
-                    disabled={cancelLoading}
-                  >
-                    {cancelLoading ? 'Cancelling...' : 'Cancel Booking'}
-                  </button>
-                  {cancelError && (
-                    <div className="text-sm text-red-500 mt-2">{cancelError}</div>
-                  )}
-                </div>
-              )}
-              {isUpcoming && !isOwnBooking && (
-                <></>
-              )}
               {isOngoing && isOwnBooking && (
                 <div className="mt-6 text-center text-[#0C5560] font-semibold bg-[#F1F8FA] rounded px-4 py-2">
                   You cannot edit or cancel this booking, because it's ongoing
                 </div>
-              )}
-              {isOngoing && !isOwnBooking && (
-                <></>
               )}
             </div>
 
