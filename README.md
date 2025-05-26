@@ -1,12 +1,63 @@
-# React + Vite
+# Holidaze
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Holidaze Logo](src/assets/holidaze-logo-dark.svg)
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Live Demo:** [https://ingebrigtprojectexam2025.netlify.app/](https://ingebrigtprojectexam2025.netlify.app/)
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Tech Stack
+
+- React with Vite
+- React Router
+- Tailwind CSS
+- React Icons
+- React-DatePicker
+- Noroff API integration
+- Gsap javascript-library
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v16.0.0 or higher)
+- npm (v8.0.0 or higher)
+
+### Installation
+
+1. Clone the repository and navigate to the project folder
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file with:
+   ```
+   VITE_NOROFF_API_KEY=your_api_key
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+5. Open `http://localhost:5173` in your browser
+
+## User Roles
+
+### Guest User
+- Browse venues
+- View venue details
+- Register/Login
+
+### Registered User
+- Book venues
+- Manage personal bookings
+- Save venues to favorites
+
+### Venue Manager
+- Create and manage venues
+- View bookings for owned venues
+
+
+
+
+
+
