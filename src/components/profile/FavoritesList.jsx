@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react';
 import VenueCard from '../cards/VenueCard';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { FaTrash } from 'react-icons/fa';
+import DeleteConfirmationModal from '../common/DeleteConfirmationModal';
 
 export default function FavoritesList({ user, favorites, onToggleFavorite }) {
   const [favoriteVenues, setFavoriteVenues] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -31,9 +34,10 @@ export default function FavoritesList({ user, favorites, onToggleFavorite }) {
   }, [user, favorites]);
 
   const handleClearAll = () => {
-    if (window.confirm('Are you sure you want to remove all favorites? This action cannot be undone.')) {
-      onToggleFavorite(null, true); // true indicates clear all
-    }
+    setDeleteLoading(true);
+    onToggleFavorite(null, true); // true indicates clear all
+    setDeleteLoading(false);
+    setShowDeleteModal(false);
   };
 
   if (!user) return null;
@@ -54,9 +58,18 @@ export default function FavoritesList({ user, favorites, onToggleFavorite }) {
 
   return (
     <div className="w-full">
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleClearAll}
+        title="Clear All Favorites"
+        message="Are you sure you want to remove all favorites? This action cannot be undone."
+        isLoading={deleteLoading}
+      />
+
       <div className="flex justify-end mb-6">
         <button
-          onClick={handleClearAll}
+          onClick={() => setShowDeleteModal(true)}
           className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
         >
           <FaTrash />

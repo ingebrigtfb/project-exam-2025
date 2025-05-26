@@ -5,6 +5,7 @@ import { FaArrowLeft, FaCalendarAlt, FaUsers, FaMapMarkerAlt, FaWifi, FaParking,
 import ImageCarousel from '../components/imageCarousel/ImageCarousel';
 import DatePicker from 'react-datepicker';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import DeleteConfirmationModal from '../components/common/DeleteConfirmationModal';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../styles/datepicker-teal.css';
 import usePageTitle from '../hooks/usePageTitle';
@@ -25,6 +26,7 @@ export default function BookingDetails() {
   const [editGuests, setEditGuests] = useState(1);
   const [venueBookings, setVenueBookings] = useState([]);
   const [isOwnBooking, setIsOwnBooking] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   
   usePageTitle('Booking Details');
   
@@ -110,9 +112,6 @@ export default function BookingDetails() {
   const isOngoing = from <= now && to >= now;
 
   const handleCancelBooking = async () => {
-    if (!window.confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
-      return;
-    }
     setCancelLoading(true);
     setCancelError('');
     try {
@@ -122,6 +121,7 @@ export default function BookingDetails() {
       setCancelError(err.message || 'Failed to cancel booking');
     } finally {
       setCancelLoading(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -234,6 +234,17 @@ export default function BookingDetails() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleCancelBooking}
+        title="Cancel Booking"
+        message="Are you sure you want to cancel this booking? This action cannot be undone."
+        itemName={booking?.venue?.name}
+        isLoading={cancelLoading}
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Venue Images */}
         <div className="mb-8">
@@ -259,12 +270,11 @@ export default function BookingDetails() {
                       <FaEdit size={20} />
                     </button>
                     <button
-                      className="bg-white/80 hover:bg-white rounded-full p-2 shadow text-red-500 transition disabled:opacity-50"
-                      onClick={handleCancelBooking}
-                      disabled={cancelLoading}
-                      title={cancelLoading ? "Cancelling..." : "Cancel booking"}
+                      className="bg-white/80 hover:bg-white rounded-full p-2 shadow text-red-500 transition"
+                      onClick={() => setShowDeleteModal(true)}
+                      title="Cancel booking"
                     >
-                      {cancelLoading ? <LoadingSpinner /> : <FaTrash size={20} />}
+                      <FaTrash size={20} />
                     </button>
                   </div>
                 )}

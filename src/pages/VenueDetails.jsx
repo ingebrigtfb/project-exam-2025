@@ -4,6 +4,7 @@ import { FaArrowLeft, FaMapMarkerAlt, FaWifi, FaParking, FaUtensils, FaPaw, FaUs
 import ImageCarousel from '../components/imageCarousel/ImageCarousel';
 import VenueBooking from '../components/venue-detail/VenueBooking';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import DeleteConfirmationModal from '../components/common/DeleteConfirmationModal';
 import AuthModal from '../auth/components/AuthModal';
 import { createBooking } from '../api/fetchBookings';
 
@@ -21,6 +22,7 @@ const VenueDetails = () => {
   const [deleteError, setDeleteError] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingBooking, setPendingBooking] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -60,9 +62,6 @@ const VenueDetails = () => {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this venue? This action cannot be undone.')) {
-      return;
-    }
     setDeleteLoading(true);
     setDeleteError('');
     try {
@@ -83,6 +82,7 @@ const VenueDetails = () => {
       setDeleteError(err.message);
     } finally {
       setDeleteLoading(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -149,6 +149,17 @@ const VenueDetails = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Delete Venue"
+        message="Are you sure you want to delete this venue? This action cannot be undone."
+        itemName={venue?.name}
+        isLoading={deleteLoading}
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Venue Images */}
         <div className="mb-8">
@@ -175,8 +186,7 @@ const VenueDetails = () => {
                     </button>
                     <button
                       className="bg-white/80 hover:bg-white rounded-full p-2 shadow text-red-500 transition"
-                      onClick={handleDelete}
-                      disabled={deleteLoading}
+                      onClick={() => setShowDeleteModal(true)}
                       title="Delete venue"
                     >
                       <FaTrash size={20} />
