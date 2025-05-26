@@ -59,7 +59,7 @@ export default function MobileSearchModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white w-full max-w-md mx-auto rounded-2xl shadow-xl p-6 relative flex flex-col">
-        <button className="absolute top-3 right-3 text-2xl text-gray-400" onClick={onClose} aria-label="Close">&times;</button>
+        <button className="absolute top-3 right-3 text-3xl text-gray-400" onClick={onClose} aria-label="Close">&times;</button>
         <h2 className="text-xl font-bold mb-4">Search</h2>
         <form onSubmit={validateAndSubmit} className="flex flex-col gap-4">
           <div>

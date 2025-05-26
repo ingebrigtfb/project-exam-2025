@@ -96,12 +96,12 @@ const BecomeVenueManager = () => {
             className="w-full h-auto rounded-lg shadow-md"
           />
         </div>
-        <div className="w-full space-y-6 flex-col items-center justify-center" ref={mobileTextRef}>
+        <div className="w-full space-y-6 flex-col text-center items-center justify-center" ref={mobileTextRef}>
           <h2 className="text-2xl font-bold text-gray-900 leading-tight">
             Got a place to share?<br />
             Become a Venue Manager.
           </h2>
-          <p className="text-lg text-gray-700">
+          <p className="text-lg text-gray-700 px-6">
             Earn money by listing your property on Holidaze. Create, manage, and track bookings easily — all in one place.
           </p>
           <button 
