@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getBooking, deleteBooking } from '../api/fetchBookings';
-import { FaArrowLeft, FaCalendarAlt, FaUsers, FaMapMarkerAlt, FaWifi, FaParking, FaUtensils, FaPaw, FaEdit, FaTimes, FaUserFriends, FaMinus, FaPlus } from 'react-icons/fa';
+import { FaArrowLeft, FaCalendarAlt, FaUsers, FaMapMarkerAlt, FaWifi, FaParking, FaUtensils, FaPaw, FaEdit, FaTimes, FaUserFriends, FaMinus, FaPlus, FaUser } from 'react-icons/fa';
 import ImageCarousel from '../components/imageCarousel/ImageCarousel';
 import DatePicker from 'react-datepicker';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -24,6 +24,7 @@ export default function BookingDetails() {
   const [editDateTo, setEditDateTo] = useState(null);
   const [editGuests, setEditGuests] = useState(1);
   const [venueBookings, setVenueBookings] = useState([]);
+  const [isOwnBooking, setIsOwnBooking] = useState(false);
   
   usePageTitle('Booking Details');
   
@@ -36,6 +37,14 @@ export default function BookingDetails() {
       try {
         const data = await getBooking(id);
         setBooking(data);
+        
+        // Check if the booking belongs to the current user
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        if (currentUser && data.customer && currentUser.name === data.customer.name) {
+          setIsOwnBooking(true);
+        } else {
+          setIsOwnBooking(false);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -48,7 +57,7 @@ export default function BookingDetails() {
 
   const fetchVenueBookings = async () => {
     try {
-      const response = await fetch(`https://v2.api.noroff.dev/holidaze/venues/${booking.venue.id}?_bookings=true`);
+      const response = await fetch(`https://v2.api.noroff.dev/holidaze/venues/${booking.venue.id}?_bookings=true&_owner=true`);
       const data = await response.json();
       if (data.data?.bookings) {
         setVenueBookings(data.data.bookings.filter(b => b.id !== booking.id)); 
@@ -204,7 +213,7 @@ export default function BookingDetails() {
       const updated = await response.json();
       
       // Fetch the venue data for the updated booking
-      const venueResponse = await fetch(`https://v2.api.noroff.dev/holidaze/venues/${booking.venue.id}`);
+      const venueResponse = await fetch(`https://v2.api.noroff.dev/holidaze/venues/${booking.venue.id}?_owner=true`);
       const venueData = await venueResponse.json();
       
       const updatedWithVenue = {
@@ -225,14 +234,6 @@ export default function BookingDetails() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <button
-        onClick={() => navigate('/profile?tab=bookings')}
-        className="mb-6 text-gray-600 hover:text-gray-800 transition-colors duration-300 flex items-center gap-2"
-      >
-        <FaArrowLeft className="h-5 w-5" />
-        Back to My Bookings
-      </button>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Venue Images */}
         <div className="mb-8">
@@ -269,8 +270,18 @@ export default function BookingDetails() {
                     <p className="font-medium">{booking.guests} people</p>
                   </div>
                 </div>
+                <div className="flex items-center space-x-3">
+                  <FaUserFriends className="text-gray-600" />
+                  <div>
+                    <p className="text-sm text-gray-500">Booked by</p>
+                    <p className="font-medium">{booking.customer.name}</p>
+                    {booking.customer.email && (
+                      <p className="text-sm text-gray-500">{booking.customer.email}</p>
+                    )}
+                  </div>
+                </div>
               </div>
-              {isUpcoming && (
+              {isUpcoming && isOwnBooking && (
                 <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
                   <button
                     type="button"
@@ -292,10 +303,16 @@ export default function BookingDetails() {
                   )}
                 </div>
               )}
-              {isOngoing && (
+              {isUpcoming && !isOwnBooking && (
+                <></>
+              )}
+              {isOngoing && isOwnBooking && (
                 <div className="mt-6 text-center text-[#0C5560] font-semibold bg-[#F1F8FA] rounded px-4 py-2">
                   You cannot edit or cancel this booking, because it's ongoing
                 </div>
+              )}
+              {isOngoing && !isOwnBooking && (
+                <></>
               )}
             </div>
 
@@ -320,6 +337,14 @@ export default function BookingDetails() {
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h2 className="text-2xl font-semibold mb-6">Venue Details</h2>
               <p className="text-gray-600 mb-6">{booking.venue.description}</p>
+              
+              <div className="flex items-center space-x-3 mb-6">
+                <FaUser className="text-gray-600" />
+                <div>
+                  <p className="text-sm text-gray-500">Venue Owner</p>
+                  <p className="font-medium">{booking.venue.owner?.name || 'Unknown'}</p>
+                </div>
+              </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {booking.venue.meta.wifi && (

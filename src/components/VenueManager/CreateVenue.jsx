@@ -114,17 +114,6 @@ export default function CreateVenue() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back to profile button */}
-        <div className="mb-8">
-          <button
-            onClick={() => navigate('/profile')}
-            className="flex items-center gap-2 text-[#0C5560] hover:text-[#094147] transition-colors"
-          >
-            <FaArrowLeft />
-            <span>Back to profile</span>
-          </button>
-        </div>
-
         {/* Image Carousel/Area */}
         <div className="mb-8 relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border">
           <img

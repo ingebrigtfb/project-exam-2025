@@ -149,14 +149,6 @@ const VenueDetails = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <button
-        onClick={handleBack}
-        className="mb-6 text-gray-600 hover:text-gray-800 transition-colors duration-300 flex items-center gap-2"
-      >
-        <FaArrowLeft className="h-5 w-5" />
-        {cameFromProfile ? 'Back to Favorites' : 'Back to Venues'}
-      </button>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Venue Images */}
         <div className="mb-8">

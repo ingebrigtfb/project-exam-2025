@@ -65,7 +65,7 @@ export const getBooking = async (id) => {
   const user = JSON.parse(localStorage.getItem('user'));
   if (!user?.accessToken) throw new Error('No authentication token found');
 
-  const response = await fetch(`https://v2.api.noroff.dev/holidaze/bookings/${id}?_venue=true`, {
+  const response = await fetch(`https://v2.api.noroff.dev/holidaze/bookings/${id}?_venue=true&_customer=true&_owner=true`, {
     headers: {
       'Authorization': `Bearer ${user.accessToken}`,
       'X-Noroff-API-Key': import.meta.env.VITE_NOROFF_API_KEY
