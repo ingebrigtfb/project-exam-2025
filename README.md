@@ -1,9 +1,6 @@
 # Holidaze
 
-![Holidaze Logo](src/assets/holidaze-logo-dark.svg)
-
-
-**Live Demo:** [https://ingebrigtprojectexam2025.netlify.app/](https://ingebrigtprojectexam2025.netlify.app/)
+**Netlify:** [https://ingebrigtprojectexam2025.netlify.app/](https://ingebrigtprojectexam2025.netlify.app/)
 
 
 ## Tech Stack
