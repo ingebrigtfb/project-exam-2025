@@ -34,6 +34,13 @@ export default function EditVenue() {
       setError('');
       try {
         const user = JSON.parse(localStorage.getItem('user'));
+        
+        if (!user || !user.venueManager) {
+          alert('This page is only accessible to venue managers. Please upgrade your account in the profile settings.');
+          navigate('/profile?tab=settings');
+          return;
+        }
+        
         const res = await fetch(`https://v2.api.noroff.dev/holidaze/venues/${id}`, {
           headers: {
             'Authorization': `Bearer ${user.accessToken}`,

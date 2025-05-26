@@ -9,6 +9,7 @@ import BookingConfirmation from './pages/BookingConfirmation';
 import RequireAuth from './auth/RequireAuth';
 import CreateVenue from './components/VenueManager/CreateVenue';
 import EditVenue from './components/VenueManager/EditVenue';
+import VenueManagerRoute from './components/common/VenueManagerRoute';
 
 const App = () => (
   <Routes>
@@ -23,12 +24,16 @@ const App = () => (
       } />
       <Route path="profile/create-venue" element={
         <RequireAuth>
-          <CreateVenue />
+          <VenueManagerRoute>
+            <CreateVenue />
+          </VenueManagerRoute>
         </RequireAuth>
       } />
       <Route path="profile/edit-venue/:id" element={
         <RequireAuth>
-          <EditVenue />
+          <VenueManagerRoute>
+            <EditVenue />
+          </VenueManagerRoute>
         </RequireAuth>
       } />
       <Route path="bookings/:id" element={

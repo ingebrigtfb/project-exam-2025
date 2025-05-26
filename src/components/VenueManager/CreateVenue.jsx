@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaTrash, FaStar, FaRegStar, FaArrowLeft } from 'react-icons/fa';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const placeholderImg = 'https://placehold.co/800x400?text=Venue+Image';
 
@@ -22,6 +23,14 @@ export default function CreateVenue() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !user.venueManager) {
+      alert('This page is only accessible to venue managers. Please upgrade your account in the profile settings.');
+      navigate('/profile?tab=settings');
+    }
+  }, [navigate]);
 
   // Add image to media array
   const handleAddImage = () => {
