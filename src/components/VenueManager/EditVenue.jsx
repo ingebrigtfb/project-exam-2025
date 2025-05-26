@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation, redirect } from 'react-router-dom';
 import { FaPlus, FaTrash, FaStar, FaRegStar, FaArrowLeft } from 'react-icons/fa';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const placeholderImg = 'https://placehold.co/800x400?text=Venue+Image';
 
@@ -154,7 +155,7 @@ export default function EditVenue() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="min-h-[400px] flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0C5560]"></div>
+          <LoadingSpinner />
         </div>
       </div>
     );
