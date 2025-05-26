@@ -104,7 +104,6 @@ export default function BookingDetails() {
     );
   }
 
-  // Only calculate isUpcoming after booking is loaded
   const now = new Date();
   const from = new Date(booking.dateFrom);
   const to = new Date(booking.dateTo);
@@ -166,7 +165,7 @@ export default function BookingDetails() {
       const bookingEnd = new Date(b.dateTo);
       bookingEnd.setHours(0, 0, 0, 0);
       
-      // Check if the date falls within any booking period
+
       return checkDate >= bookingStart && checkDate <= bookingEnd;
     });
   };

@@ -22,7 +22,7 @@ export default function ImageCarousel({ images = [], defaultAlt = '' }) {
   return (
     <>
       <div
-        className="relative w-full h-48 md:h-150 rounded-lg overflow-hidden group"
+        className="relative w-full h-64 sm:h-48 md:h-150 rounded-lg overflow-hidden group"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         tabIndex={0}

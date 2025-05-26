@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { FaArrowLeft, FaMapMarkerAlt, FaWifi, FaParking, FaUtensils, FaPaw, FaUser, FaStar, FaRegStar, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaArrowLeft, FaMapMarkerAlt, FaWifi, FaParking, FaUtensils, FaPaw, FaUser, FaStar, FaRegStar, FaEdit, FaTrash, FaHeart } from 'react-icons/fa';
+import { CiHeart } from 'react-icons/ci';
 import ImageCarousel from '../components/imageCarousel/ImageCarousel';
 import VenueBooking from '../components/venue-detail/VenueBooking';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -23,9 +24,27 @@ const VenueDetails = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingBooking, setPendingBooking] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [id]);
+
+  useEffect(() => {
+    const checkIfFavorite = () => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user) {
+        const favoritesKey = `favorites_${user.name}`;
+        try {
+          const favorites = JSON.parse(localStorage.getItem(favoritesKey)) || [];
+          setIsFavorite(favorites.includes(id));
+        } catch {
+          setIsFavorite(false);
+        }
+      }
+    };
+
+    checkIfFavorite();
   }, [id]);
 
   useEffect(() => {
@@ -108,6 +127,31 @@ const VenueDetails = () => {
     }
   };
 
+  const handleToggleFavorite = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    const favoritesKey = `favorites_${user.name}`;
+    try {
+      const favorites = JSON.parse(localStorage.getItem(favoritesKey)) || [];
+      let newFavorites;
+      
+      if (favorites.includes(id)) {
+        newFavorites = favorites.filter(venueId => venueId !== id);
+      } else {
+        newFavorites = [...favorites, id];
+      }
+      
+      localStorage.setItem(favoritesKey, JSON.stringify(newFavorites));
+      setIsFavorite(!isFavorite);
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -174,7 +218,18 @@ const VenueDetails = () => {
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex justify-between items-start mb-6">
-                <h2 className="text-2xl font-semibold">{venue.name}</h2>
+                <div className="flex items-center gap-4">
+                  <h2 className="text-2xl font-semibold">{venue.name}</h2>
+                  {user && !isOwner && (
+                    <button
+                      className={`rounded-full p-1 shadow transition bg-white/70 ${isFavorite ? 'text-red-500' : 'text-[#0C5560]'}`}
+                      onClick={handleToggleFavorite}
+                      aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                      {isFavorite ? <FaHeart size={24} color="#ef4444" /> : <CiHeart size={24} color="#0C5560" />}
+                    </button>
+                  )}
+                </div>
                 {isOwner && (
                   <div className="flex gap-2">
                     <button

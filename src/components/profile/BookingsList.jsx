@@ -107,7 +107,7 @@ export default function BookingsList() {
                     <img
                       src={booking.venue.media[0]?.url}
                       alt={booking.venue.media[0]?.alt || 'Venue image'}
-                      className="w-full h-36 object-cover"
+                      className="w-full h-48 sm:h-36 object-cover"
                     />
                     <div className="absolute top-0 right-0 bg-white px-2 py-0.5 m-2 rounded-full text-xs font-medium">
                       {booking.guests} {booking.guests === 1 ? 'Guest' : 'Guests'}
@@ -185,7 +185,7 @@ export default function BookingsList() {
                     <img
                       src={booking.venue.media[0]?.url}
                       alt={booking.venue.media[0]?.alt || 'Venue image'}
-                      className="w-full h-36 object-cover"
+                      className="w-full h-48 sm:h-36 object-cover"
                     />
                     <div className="absolute top-0 right-0 bg-white px-2 py-0.5 m-2 rounded-full text-xs font-medium">
                       {booking.guests} {booking.guests === 1 ? 'Guest' : 'Guests'}
